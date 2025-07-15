@@ -7,5 +7,11 @@ import java.util.List;
 
 @Mapper
 public interface UserMapper {
-    List<User> getUsers();
+    List<User> getAllUsers();
+
+    User getUserById(String userId);
+
+    void updateUser(String userId);
+
+    void deleteUser(String userId);
 }

@@ -4,7 +4,7 @@
 
 <mapper namespace="com.ccp.simple.mapper.UserMapper">
 
-    <select id="getUsers" resultType="user">
+    <select id="getAllUsers" resultType="user">
         SELECT
             USER_ID,
             USER_PASSWORD,
@@ -13,4 +13,30 @@
             UPDATE_DT
         FROM USER_INFO
     </select>
+
+    <select id="getUserById" parameterType="String" resultType="user">
+        SELECT
+            USER_ID,
+            USER_PASSWORD,
+            USER_NAME,
+            CREATE_DT,
+            UPDATE_DT
+        FROM USER_INFO
+        WHERE USER_ID = #{USER_ID}
+    </select>
+
+    <update id="updateUser" parameterType="String">
+        UPDATE USER_INFO
+        SET
+            USER_PASSWORD = #{userPassword},
+            USER_NAME = #{userName},
+            UPDATE_DT = NOW()
+        WHERE USER_ID = #{USER_ID}
+    </update>
+
+    <delete id="deleteUser" parameterType="String">
+        DELETE
+        FROM USER_INFO
+        WHERE USER_ID = #{USER_ID}
+    </delete>
 </mapper>

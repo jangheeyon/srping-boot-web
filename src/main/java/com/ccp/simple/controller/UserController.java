@@ -3,9 +3,7 @@ package com.ccp.simple.controller;
 import com.ccp.simple.domain.User;
 import com.ccp.simple.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -17,8 +15,24 @@ public class UserController {
 
     //조회
     @GetMapping()
-    public List<User> getUsers() {
-        List<User> users = userService.getUsers();
-        return users;
+    public List<User> getAllUsers() {
+        return userService.getAllUsers();
+    }
+
+    @GetMapping("/{userId}")
+    public User getUserById(@PathVariable String userId) {
+        return userService.getUserById(userId);
+    }
+
+    // 3. 회원 수정 (PUT /user/{id})
+    @PutMapping("/{userId}")
+    public void updateUser(@PathVariable String userId) {
+       userService.updateUser(userId);
+    }
+
+    // 4. 회원 삭제 (DELETE /user/{id})
+    @DeleteMapping("/{userId}")
+    public void deleteUser(@PathVariable String userId) {
+        userService.deleteUser(userId);
     }
 }
