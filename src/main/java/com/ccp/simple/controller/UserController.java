@@ -19,18 +19,19 @@ public class UserController {
         return userService.getAllUsers();
     }
 
+    //개별 조회
     @GetMapping("/{userId}")
     public User getUserById(@PathVariable String userId) {
         return userService.getUserById(userId);
     }
 
-    // 3. 회원 수정 (PUT /user/{id})
+    //회원 수정
     @PutMapping("/{userId}")
     public void updateUser(@PathVariable String userId) {
        userService.updateUser(userId);
     }
 
-    // 4. 회원 삭제 (DELETE /user/{id})
+    //회원 삭제
     @DeleteMapping("/{userId}")
     public void deleteUser(@PathVariable String userId) {
         userService.deleteUser(userId);
