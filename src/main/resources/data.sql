@@ -6,11 +6,11 @@ INSERT INTO USER_INFO (
     UPDATE_DT
 )
 VALUES (
-    '1',
-    'aaa',
-    '홍길동',
-    NOW(),
-    NULL
+   '1',
+   'aaa',
+   '홍길동',
+   CURRENT_TIMESTAMP,
+   NULL
 );
 INSERT INTO USER_INFO (
     USER_ID,
@@ -20,9 +20,9 @@ INSERT INTO USER_INFO (
     UPDATE_DT
 )
 VALUES (
-       '2',
-       'bbb',
-       '박나래',
-       NOW(),
-       NULL
-);
+   '2',
+   'bbb',
+   '홍길순',
+   CURRENT_TIMESTAMP,
+   NULL
+       );
