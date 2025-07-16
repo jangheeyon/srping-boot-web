@@ -27,13 +27,19 @@ public class UserController {
 
     //회원 수정
     @PutMapping("/{userId}")
-    public void updateUser(@PathVariable String userId) {
-       userService.updateUser(userId);
+    public void updateUser(@ModelAttribute User user) {
+       userService.updateUser(user);
     }
 
     //회원 삭제
     @DeleteMapping("/{userId}")
     public void deleteUser(@PathVariable String userId) {
         userService.deleteUser(userId);
+    }
+
+    //회원 등록
+    @PostMapping()
+    public void insertUser(@ModelAttribute User user) {
+        userService.insertUser(user);
     }
 }
