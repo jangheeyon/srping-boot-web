@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>회원 목록</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body class="container mt-5">
+<h1 class="mb-4">회원 목록</h1>
+
+<table class="table table-bordered">
+    <thead class="table-light">
+    <tr>
+        <th>아이디</th>
+        <th>이름</th>
+        <th>삭제</th>
+    </tr>
+    </thead>
+    <tbody id="user-table-body">
+    </tbody>
+</table>
+<button class="btn btn-success" onclick="moveToIndex()">목록</button>
+<button class="btn btn-success" onclick="insertUser()">등록</button>
+<script>
+    window.onload = function () {
+        fetch("/user")
+            .then(response => {
+                if (!response.ok) throw new Error("회원 목록 API 호출 실패");
+                return response.json();
+            })
+            .then(data => {
+                const tbody = document.getElementById("user-table-body");
+                data.forEach(user => {
+                    const tr = document.createElement("tr");
+                    const tdId = document.createElement("td");
+                    tdId.textContent = user.userId;
+                    const tdName = document.createElement("td");
+                    tdName.textContent = user.userName;
+                    const tdDelete = document.createElement("td");
+                    const deleteBtn = document.createElement("button");
+                    deleteBtn.textContent = "X";
+                    deleteBtn.classList.add("btn", "btn-danger", "btn-sm");
+
+                    deleteBtn.onclick = function () {
+                        if(confirm(user.userName + "님을 삭제하시겠습니까?")) {
+                            fetch("/user/" + user.userId, {
+                                method: "DELETE"
+                            })
+                                .then(response => {
+                                    if (!response.ok) throw new Error("삭제 실패");
+                                    tr.remove();
+                                })
+                                .catch(error => {
+                                    console.error("삭제 중 오류 발생:", error);
+                                })
+                        }
+                    };
+
+                    tr.appendChild(tdId);
+                    tr.appendChild(tdName);
+                    tdDelete.appendChild(deleteBtn);
+                    tr.appendChild(tdDelete);
+
+                    tbody.appendChild(tr);
+                });
+            })
+            .catch(error => {
+                console.error("오류 발생:", error);
+            });
+    };
+
+    //목록 이동
+    function moveToIndex() {
+        window.location.href = "index.html";
+    }
+
+    //회원 등록
+    function insertUser() {
+        window.location.href = "userForm.html";
+    }
+</script>
+</body>
+</html>
