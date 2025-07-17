@@ -16,4 +16,6 @@ public interface UserMapper {
     void deleteUser(String userId);
 
     void insertUser(User user);
+
+    String getMaxUserId();
 }

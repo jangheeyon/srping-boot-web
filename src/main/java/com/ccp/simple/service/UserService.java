@@ -14,4 +14,6 @@ public interface UserService {
     void deleteUser(String userId);
 
     void insertUser(User user);
+
+    String generateNextUserId();
 }

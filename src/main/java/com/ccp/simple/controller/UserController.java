@@ -27,7 +27,7 @@ public class UserController {
 
     //회원 수정
     @PutMapping("/{userId}")
-    public void updateUser(@ModelAttribute User user) {
+    public void updateUser(@RequestBody User user) {
        userService.updateUser(user);
     }
 
@@ -39,7 +39,10 @@ public class UserController {
 
     //회원 등록
     @PostMapping()
-    public void insertUser(@ModelAttribute User user) {
+    public void insertUser(@RequestBody User user) {
+        String newId = userService.generateNextUserId();
+        user.setUserId(newId);
         userService.insertUser(user);
     }
+
 }

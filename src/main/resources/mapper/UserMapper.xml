@@ -4,7 +4,7 @@
 
 <mapper namespace="com.ccp.simple.mapper.UserMapper">
 
-    <select id="getAllUsers" resultType="user">
+    <select id="getAllUsers" resultType="com.ccp.simple.domain.User">
         SELECT
             USER_ID,
             USER_PASSWORD,
@@ -14,7 +14,7 @@
         FROM USER_INFO
     </select>
 
-    <select id="getUserById" parameterType="String" resultType="user">
+    <select id="getUserById" parameterType="String" resultType="com.ccp.simple.domain.User">
         SELECT
             USER_ID,
             USER_PASSWORD,
@@ -25,7 +25,7 @@
         WHERE USER_ID = #{userId}
     </select>
 
-    <update id="updateUser" parameterType="String">
+    <update id="updateUser" parameterType="com.ccp.simple.domain.User">
         UPDATE USER_INFO
         SET
             USER_PASSWORD = #{userPassword},
@@ -40,7 +40,7 @@
         WHERE USER_ID = #{userId}
     </delete>
 
-    <insert id="insertUser" parameterType="user">
+    <insert id="insertUser" parameterType="com.ccp.simple.domain.User">
         INSERT INTO USER_INFO (
             USER_ID,
             USER_PASSWORD,
@@ -52,6 +52,10 @@
             #{userPassword},
             #{userName},
             CURRENT_TIMESTAMP
-            )
+        )
     </insert>
+
+    <select id="getMaxUserId" resultType="String">
+        SELECT MAX(USER_ID) FROM USER_INFO
+    </select>
 </mapper>

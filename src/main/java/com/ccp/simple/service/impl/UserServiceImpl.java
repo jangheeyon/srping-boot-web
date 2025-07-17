@@ -38,4 +38,15 @@ public class UserServiceImpl implements UserService {
     public void insertUser(User user) {
         userMapper.insertUser(user);
     }
+
+    @Override
+    public String generateNextUserId() {
+        String maxId = userMapper.getMaxUserId();
+        if (maxId == null) {
+            return "A001";
+        }
+        int num = Integer.parseInt(maxId.substring(1));
+        num++;
+        return String.format("A%03d", num);
+    }
 }
