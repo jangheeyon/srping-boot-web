@@ -19,7 +19,7 @@
     <tbody id="user-table-body">
     </tbody>
 </table>
-<button class="btn btn-success" onclick="moveToIndex()">목록</button>
+<button class="btn btn-success" onclick="moveToIndex()">메인</button>
 <button class="btn btn-success" onclick="insertUser()">등록</button>
 <script>
     window.onload = function () {
@@ -32,10 +32,16 @@
                 const tbody = document.getElementById("user-table-body");
                 data.forEach(user => {
                     const tr = document.createElement("tr");
+
                     const tdId = document.createElement("td");
                     tdId.textContent = user.userId;
+
                     const tdName = document.createElement("td");
-                    tdName.textContent = user.userName;
+                    const aTag = document.createElement("a");
+                    aTag.textContent = user.userName;
+                    aTag.href = "userInfo.html?userId=" + user.userId;
+                    tdName.appendChild(aTag);
+
                     const tdDelete = document.createElement("td");
                     const deleteBtn = document.createElement("button");
                     deleteBtn.textContent = "X";
@@ -69,7 +75,7 @@
             });
     };
 
-    //목록 이동
+    //메인 이동
     function moveToIndex() {
         window.location.href = "index.html";
     }
