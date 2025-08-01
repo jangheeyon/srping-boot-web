@@ -1,14 +1,11 @@
-package com.ccp.simple.domain;
+package com.ccp.simple.dto;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class User {
+public class LoginRequestDto {
     private String userId;
     private String userPassword;
-    private String userName;
-    private String createDt;
-    private String updateDt;
 }

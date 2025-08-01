@@ -20,5 +20,7 @@ mybatis:
     map-underscore-to-camel-case: true
 
 logging:
-  lever:
-    root: INFO
+  level:
+    root: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.http.converter.json: DEBUG

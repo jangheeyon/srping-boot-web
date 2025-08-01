@@ -49,4 +49,10 @@ public class UserServiceImpl implements UserService {
         num++;
         return String.format("A%03d", num);
     }
+
+    @Override
+    public boolean validateUser(String userId, String userPassword) {
+        User user = userMapper.getUserById(userId);
+        return user != null && user.getUserPassword().equals(userPassword);
+    }
 }

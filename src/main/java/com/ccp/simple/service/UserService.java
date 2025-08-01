@@ -16,4 +16,6 @@ public interface UserService {
     void insertUser(User user);
 
     String generateNextUserId();
+
+    boolean validateUser(String userId, String userPassword);
 }
