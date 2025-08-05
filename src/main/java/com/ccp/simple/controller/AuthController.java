@@ -6,6 +6,7 @@ import com.ccp.simple.security.JwtTokenProvider;
 import com.ccp.simple.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -28,5 +29,13 @@ public class AuthController {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return "Invalid credentials";
         }
+    }
+
+    @GetMapping("/me")
+    public String currentUser(Authentication authentication) {
+        if(authentication == null) {
+            return "No Authentication found";
+        }
+        return "Currunt User ID : " + authentication.getPrincipal();
     }
 }
