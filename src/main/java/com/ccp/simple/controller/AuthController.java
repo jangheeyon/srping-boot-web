@@ -8,9 +8,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -22,34 +25,75 @@ public class AuthController {
     private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequestDto request, HttpServletResponse response) {
+    public Map<String, String> login(@RequestBody LoginRequestDto request, HttpServletResponse response) {
         //검증
         boolean valid = userService.validateUser(request.getUserId(), request.getUserPassword());
-        if(!valid) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid credentials"));
+        if (!valid) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
         }
         User user = userService.getUserById(request.getUserId());
         String role = user.getRole();
-        String token = jwtTokenProvider.createToken(request.getUserId(), role);
-        response.setHeader("Authorization", "Bearer " + token);
-        return ResponseEntity.ok(Map.of("message", "Login successful", "token", token));
+        String accessToken = jwtTokenProvider.createToken(request.getUserId(), role);
+        String refreshToken = jwtTokenProvider.createRefreshToken(request.getUserId());
+
+        userService.updateRefreshToken(request.getUserId(), refreshToken);
+
+        Map<String, String> token = new HashMap<>();
+        token.put("accessToken", accessToken);
+        token.put("refreshToken", refreshToken);
+        return token;
     }
 
     @GetMapping("/me")
     public String currentUser(Authentication authentication) {
-        if(authentication == null) {
+        if (authentication == null) {
             return "No Authentication found";
         }
         return "Currunt User ID : " + authentication.getPrincipal();
     }
 
     @GetMapping("/admin/test")
+    @PreAuthorize("hasRole('ADMIN')")
     public String adminOnly() {
         return "관리자만 접근 가능";
     }
 
     @GetMapping("/user/test")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public String userAll() {
         return "유저 접근 가능";
+    }
+
+    @PostMapping("/refresh")
+    public Map<String, String> refreshToken(@RequestBody Map<String, String> request) {
+        String refreshToken = request.get("refreshToken");
+
+        if (!jwtTokenProvider.validateToken(refreshToken)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid refresh token");
+        }
+
+        String userId = jwtTokenProvider.getUserId(refreshToken);
+        User user = userService.getUserById(userId);
+        String savedRefreshToken = user.getRefreshToken();
+        if (!refreshToken.equals(savedRefreshToken)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Refresh token mismatch");
+        }
+
+        String role = user.getRole();
+        String newAccessToken = jwtTokenProvider.createToken(userId, role);
+
+        Map<String, String> tokens = new HashMap<>();
+        tokens.put("accessToken", newAccessToken);
+        return tokens;
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(Authentication authentication) {
+        if(authentication == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        String userId = authentication.getName();
+        userService.updateRefreshToken(userId, null);
+        return ResponseEntity.ok().build();
     }
 }

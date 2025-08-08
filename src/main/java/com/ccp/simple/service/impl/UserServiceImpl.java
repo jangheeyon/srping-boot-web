@@ -55,4 +55,12 @@ public class UserServiceImpl implements UserService {
         User user = userMapper.getUserById(userId);
         return user != null && user.getUserPassword().equals(userPassword);
     }
+
+    @Override
+    public void updateRefreshToken(String userId, String refreshToken) {
+        User user = new User();
+        user.setUserId(userId);
+        user.setRefreshToken(refreshToken);
+        userMapper.updateUser(user);
+    }
 }

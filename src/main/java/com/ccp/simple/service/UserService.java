@@ -18,4 +18,6 @@ public interface UserService {
     String generateNextUserId();
 
     boolean validateUser(String userId, String userPassword);
+
+    void updateRefreshToken(String userId, String refreshToken);
 }

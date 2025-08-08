@@ -12,4 +12,5 @@ public class User {
     private String createDt;
     private String updateDt;
     private String role;
+    private String refreshToken;
 }
