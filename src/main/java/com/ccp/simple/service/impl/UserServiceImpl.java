@@ -36,6 +36,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void insertUser(User user) {
+        String newId = generateNextUserId();
+        user.setUserId(newId);
         userMapper.insertUser(user);
     }
 

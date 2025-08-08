@@ -21,10 +21,28 @@
 </table>
 <button class="btn btn-success" onclick="moveToIndex()">메인</button>
 <button class="btn btn-success" onclick="insertUser()">등록</button>
+
 <script>
     window.onload = function () {
-        fetch("/user")
+        const accessToken = localStorage.getItem("accessToken");
+        if (!accessToken) {
+            alert("로그인이 필요합니다.");
+            window.location.href = "/login.html";
+            return;
+        }
+
+        fetch("/user", {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${accessToken}`
+            }
+        })
             .then(response => {
+                if (response.status === 401 || response.status === 403) {
+                    alert("인증이 필요합니다. 로그인 페이지로 이동합니다.");
+                    window.location.href = "/login.html";
+                    throw new Error("Unauthorized");
+                }
                 if (!response.ok) throw new Error("회원 목록 API 호출 실패");
                 return response.json();
             })
@@ -48,9 +66,12 @@
                     deleteBtn.classList.add("btn", "btn-danger", "btn-sm");
 
                     deleteBtn.onclick = function () {
-                        if(confirm(user.userName + "님을 삭제하시겠습니까?")) {
+                        if (confirm(user.userName + "님을 삭제하시겠습니까?")) {
                             fetch("/user/" + user.userId, {
-                                method: "DELETE"
+                                method: "DELETE",
+                                headers: {
+                                    "Authorization": `Bearer ${accessToken}`
+                                }
                             })
                                 .then(response => {
                                     if (!response.ok) throw new Error("삭제 실패");

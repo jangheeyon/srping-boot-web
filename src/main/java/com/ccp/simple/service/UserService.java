@@ -1,9 +1,11 @@
 package com.ccp.simple.service;
 
 import com.ccp.simple.domain.User;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Transactional
 public interface UserService {
     List<User> getAllUsers();
 

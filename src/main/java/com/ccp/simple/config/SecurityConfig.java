@@ -23,13 +23,26 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers("/login.html", "/api/login", "/api/refresh").permitAll()
+                        // 정적 리소스와 페이지는 모두 허용
+                        .requestMatchers(
+                                "/h2-console/**",
+                                "/",
+                                "/index",
+                                "/index.html",
+                                "/login.html",
+                                "/userList.html",
+                                "/js/**",   // js 폴더 등 프론트 정적 파일 경로가 있다면 추가
+                                "/css/**",  // css 경로도 필요하면 추가
+                                "/api/login",
+                                "/api/refresh",
+                                "/user/register"
+                        ).permitAll()
+                        // API 권한 설정
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN")
+                        // 그 외는 인증 필요
                         .anyRequest().authenticated()
                 )
-//                .httpBasic(Customizer.withDefaults());
                 .addFilterBefore(
                         new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class
                 );

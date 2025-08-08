@@ -1,8 +1,10 @@
 package com.ccp.simple.controller;
 
 import com.ccp.simple.domain.User;
+import com.ccp.simple.dto.RegisterRequestDto;
 import com.ccp.simple.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -38,10 +40,13 @@ public class UserController {
     }
 
     //회원 등록
-    @PostMapping()
-    public void insertUser(@RequestBody User user) {
-        String newId = userService.generateNextUserId();
-        user.setUserId(newId);
+    @PostMapping("/register")
+    public ResponseEntity<String> insertUser(@RequestBody RegisterRequestDto dto) {
+        User user = new User();
+        user.setUserName(dto.getUserName());
+        user.setUserPassword(dto.getUserPassword());
+        user.setRole(dto.getRole());
         userService.insertUser(user);
+        return ResponseEntity.ok("회원가입 성공");
     }
 }
