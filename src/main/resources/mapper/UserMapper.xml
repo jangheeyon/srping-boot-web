@@ -10,7 +10,8 @@
             USER_PASSWORD,
             USER_NAME,
             CREATE_DT,
-            UPDATE_DT
+            UPDATE_DT,
+            ROLE
         FROM USER_INFO
     </select>
 
@@ -20,7 +21,8 @@
             USER_PASSWORD,
             USER_NAME,
             CREATE_DT,
-            UPDATE_DT
+            UPDATE_DT,
+            ROLE
         FROM USER_INFO
         WHERE USER_ID = #{userId}
     </select>

@@ -44,5 +44,4 @@ public class UserController {
         user.setUserId(newId);
         userService.insertUser(user);
     }
-
 }
