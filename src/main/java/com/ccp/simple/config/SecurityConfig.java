@@ -30,6 +30,7 @@ public class SecurityConfig {
                                 "/index",
                                 "/index.html",
                                 "/login.html",
+                                "/signup.html",
                                 "/userList.html",
                                 "/js/**",   // js 폴더 등 프론트 정적 파일 경로가 있다면 추가
                                 "/css/**",  // css 경로도 필요하면 추가

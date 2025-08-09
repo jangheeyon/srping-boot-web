@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8" />
-    <title>메인 & 로그인 페이지</title>
+    <title>회원가입</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <style>
         body {
@@ -25,7 +25,7 @@
             color: #343a40;
             margin-bottom: 30px;
         }
-        input {
+        input, select {
             margin-bottom: 20px;
             height: 40px;
             font-size: 1rem;
@@ -44,14 +44,6 @@
             transition: all 0.3s ease-in-out;
             margin-bottom: 10px;
         }
-        .btn-login {
-            background-color: #28a745;
-            color: white;
-        }
-        .btn-login:hover {
-            background-color: #218838;
-            transform: scale(1.05);
-        }
         .btn-signup {
             background-color: #007bff;
             color: white;
@@ -60,8 +52,21 @@
             background-color: #0069d9;
             transform: scale(1.05);
         }
+        .btn-back {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-back:hover {
+            background-color: #5a6268;
+            transform: scale(1.05);
+        }
         .error-msg {
             color: red;
+            margin-bottom: 10px;
+            display: none;
+        }
+        .success-msg {
+            color: green;
             margin-bottom: 10px;
             display: none;
         }
@@ -69,60 +74,63 @@
 </head>
 <body>
 <div class="card">
-    <h1>로그인</h1>
-    <div class="error-msg" id="errorMsg">아이디 또는 비밀번호가 올바르지 않습니다.</div>
-    <input type="text" id="userId" placeholder="아이디" />
+    <h1>회원가입</h1>
+    <div class="error-msg" id="errorMsg"></div>
+    <div class="success-msg" id="successMsg"></div>
+    <input type="text" id="userName" placeholder="이름" />
     <input type="password" id="userPassword" placeholder="비밀번호" />
-    <button class="btn-custom btn-login" onclick="login()">로그인</button>
-    <button class="btn-custom btn-signup" onclick="goToSignUp()">회원가입</button>
+    <select id="role">
+        <option value="">권한 선택</option>
+        <option value="ROLE_ADMIN">관리자</option>
+        <option value="ROLE_USER">일반</option>
+    </select>
+    <button class="btn-custom btn-signup" onclick="signUp()">회원가입</button>
+    <button class="btn-custom btn-back" onclick="goBack()">뒤로가기</button>
 </div>
 
 <script>
-    async function login() {
-        const userId = document.getElementById('userId').value.trim();
+    async function signUp() {
+        const userName = document.getElementById('userName').value.trim();
         const userPassword = document.getElementById('userPassword').value.trim();
+        const role = document.getElementById('role').value.trim();
         const errorMsg = document.getElementById('errorMsg');
-        errorMsg.style.display = 'none';
+        const successMsg = document.getElementById('successMsg');
 
-        if (!userId || !userPassword) {
-            errorMsg.textContent = "아이디와 비밀번호를 모두 입력하세요.";
+        errorMsg.style.display = 'none';
+        successMsg.style.display = 'none';
+
+        if (!userName || !userPassword || !role) {
+            errorMsg.textContent = "모든 항목을 입력하세요.";
             errorMsg.style.display = 'block';
             return;
         }
 
         try {
-            const response = await fetch('/api/login', {
+            const response = await fetch('/user/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId, userPassword })
+                body: JSON.stringify({ userName, userPassword, role })
             });
 
             if (response.ok) {
-                const data = await response.json();
-                const accessToken = data.accessToken;
-                const refreshToken = data.refreshToken;
-
-                if (accessToken && refreshToken) {
-                    localStorage.setItem('accessToken', accessToken);
-                    localStorage.setItem('refreshToken', refreshToken);
-
-                    window.location.href = "userList.html";
-                } else {
-                    throw new Error('토큰이 응답에 없습니다.');
-                }
+                successMsg.textContent = "회원가입이 완료되었습니다.";
+                successMsg.style.display = 'block';
+                setTimeout(() => {
+                    window.location.href = "index.html";
+                }, 1500);
             } else {
-                errorMsg.textContent = "아이디 또는 비밀번호가 올바르지 않습니다.";
+                errorMsg.textContent = "회원가입에 실패했습니다.";
                 errorMsg.style.display = 'block';
             }
         } catch (err) {
-            errorMsg.textContent = "로그인 중 오류가 발생했습니다.";
+            errorMsg.textContent = "회원가입 중 오류가 발생했습니다.";
             errorMsg.style.display = 'block';
             console.error(err);
         }
     }
 
-    function goToSignUp() {
-        window.location.href = "signup.html"; // 회원가입 페이지 경로
+    function goBack() {
+        window.location.href = "index.html";
     }
 </script>
 </body>
