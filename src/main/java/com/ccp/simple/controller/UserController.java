@@ -43,6 +43,7 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<String> insertUser(@RequestBody RegisterRequestDto dto) {
         User user = new User();
+        user.setUserId(dto.getUserId());
         user.setUserName(dto.getUserName());
         user.setUserPassword(dto.getUserPassword());
         user.setRole(dto.getRole());

@@ -1,7 +1,6 @@
 package com.ccp.simple.mapper;
 
 import com.ccp.simple.domain.User;
-import com.ccp.simple.dto.RegisterRequestDto;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
