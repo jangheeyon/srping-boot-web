@@ -1,7 +1,9 @@
 package com.ccp.simple.controller;
 
 import com.ccp.simple.domain.User;
-import com.ccp.simple.dto.RegisterRequestDto;
+import com.ccp.simple.dto.RegisterUserRequestDto;
+import com.ccp.simple.dto.RegisterUserRequestDto;
+import com.ccp.simple.dto.UpdateUserRequestDto;
 import com.ccp.simple.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +13,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("user")
+@RequestMapping("/api/user")
 public class UserController {
     private final UserService userService;
 
@@ -29,11 +31,15 @@ public class UserController {
 
     //회원 수정
     @PutMapping("/{userId}")
-    public void updateUser(@RequestBody User user) {
+    public void updateUser(@RequestBody UpdateUserRequestDto updateUserRequestDto) {
+        User user = new User();
+        user.setUserPassword(updateUserRequestDto.getUserPassword());
+        user.setUserName(updateUserRequestDto.getUserName());
+        user.setRole(updateUserRequestDto.getRole());
        userService.updateUser(user);
     }
 
-    //회원 삭제
+    //회원 삭제8
     @DeleteMapping("/{userId}")
     public void deleteUser(@PathVariable String userId) {
         userService.deleteUser(userId);
@@ -41,7 +47,7 @@ public class UserController {
 
     //회원 등록
     @PostMapping("/register")
-    public ResponseEntity<String> insertUser(@RequestBody RegisterRequestDto dto) {
+    public ResponseEntity<String> insertUser(@RequestBody RegisterUserRequestDto dto) {
         User user = new User();
         user.setUserId(dto.getUserId());
         user.setUserName(dto.getUserName());

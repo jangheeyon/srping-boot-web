@@ -11,6 +11,10 @@
 
 <form id="userForm">
     <div class="mb-3">
+        <label for="userName" class="form-label">아이디</label>
+        <input type="text" class="form-control" id="userId" readonly>
+    </div>
+    <div class="mb-3">
         <label for="userName" class="form-label">이름</label>
         <input type="text" class="form-control" id="userName" required>
     </div>
@@ -22,6 +26,14 @@
                 👁️
             </button>
         </div>
+    </div>
+    <div class="mb-3">
+        <label for="role" class="form-label">권한</label>
+        <select class="form-select" id="role" required>
+            <option value="">권한 선택</option>
+            <option value="ROLE_ADMIN">관리자</option>
+            <option value="ROLE_USER">일반</option>
+        </select>
     </div>
     <button type="submit" class="btn btn-primary">수정</button>
     <button type="button" class="btn btn-secondary" onclick="moveToBack()">뒤로</button>
@@ -38,14 +50,16 @@
     }
 
     // 사용자 정보 조회
-    fetch("/user/" + userId)
+    fetch("/api/user/" + userId)
         .then(response => {
             if (!response.ok) throw new Error("사용자 조회 실패");
             return response.json();
         })
         .then(user => {
+            document.getElementById("userId").value = user.userId;
             document.getElementById("userName").value = user.userName;
             document.getElementById("userPassword").value = user.userPassword;
+            document.getElementById("role").value = user.role;
         })
         .catch(error => {
             console.error("조회 오류:", error);
@@ -57,11 +71,12 @@
     document.getElementById("userForm").onsubmit = function (e) {
         e.preventDefault();
         const user = {
-            userId: userId,
+            userId: document.getElementById("userId").value,
             userName: document.getElementById("userName").value,
-            userPassword: document.getElementById("userPassword").value
+            userPassword: document.getElementById("userPassword").value,
+            role: document.getElementById("role").value
         };
-        fetch("/user/" + userId, {
+        fetch("/api/user/" + userId, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json"

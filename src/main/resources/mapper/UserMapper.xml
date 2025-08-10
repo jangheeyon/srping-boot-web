@@ -18,7 +18,7 @@
 
     <select id="getUserById" parameterType="String" resultType="com.ccp.simple.domain.User">
         SELECT
-            ID
+            ID,
             USER_ID,
             USER_PASSWORD,
             USER_NAME,
@@ -39,14 +39,16 @@
             <if test="userName != null and userName != ''">
                 USER_NAME = #{userName},
             </if>
-            UPDATE_DT = CURRENT_TIMESTAMP,
+            <if test="role != null and role != ''">
+                ROLE = #{role},
+            </if>
             <if test="refreshToken != null and refreshToken != ''">
                 REFRESH_TOKEN = #{refreshToken},
             </if>
+            UPDATE_DT = CURRENT_TIMESTAMP,
         </set>
         WHERE USER_ID = #{userId}
     </update>
-
 
     <delete id="deleteUser" parameterType="String">
         DELETE
