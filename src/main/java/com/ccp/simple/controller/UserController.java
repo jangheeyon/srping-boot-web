@@ -2,7 +2,6 @@ package com.ccp.simple.controller;
 
 import com.ccp.simple.domain.User;
 import com.ccp.simple.dto.RegisterUserRequestDto;
-import com.ccp.simple.dto.RegisterUserRequestDto;
 import com.ccp.simple.dto.UpdateUserRequestDto;
 import com.ccp.simple.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -33,13 +32,14 @@ public class UserController {
     @PutMapping("/{userId}")
     public void updateUser(@RequestBody UpdateUserRequestDto updateUserRequestDto) {
         User user = new User();
+        user.setUserId(updateUserRequestDto.getUserId());
         user.setUserPassword(updateUserRequestDto.getUserPassword());
         user.setUserName(updateUserRequestDto.getUserName());
         user.setRole(updateUserRequestDto.getRole());
        userService.updateUser(user);
     }
 
-    //회원 삭제8
+    //회원 삭제
     @DeleteMapping("/{userId}")
     public void deleteUser(@PathVariable String userId) {
         userService.deleteUser(userId);
