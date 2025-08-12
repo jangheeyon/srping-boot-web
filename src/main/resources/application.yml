@@ -1,17 +1,9 @@
 spring:
   datasource:
-    url: jdbc:h2:file:./data/testdb;DB_CLOSE_ON_EXIT=FALSE
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-  h2:
-    console:
-      enabled: true
-  sql:
-    init:
-      schema-locations: classpath:schema.sql
-#      data-locations: classpath:data.sql
-      mode: always
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://dpg-d2ddbtogjchc73djg6a0-a.singapore-postgres.render.com:5432/simple_iltf
+    username: simple_iltf_user
+    password: r0wIZhk0jQfnrezBZlfH6Xrv0myK9pH3
 
 mybatis:
   mapper-locations: classpath:/mapper/**/*.xml
