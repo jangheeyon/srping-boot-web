@@ -1,5 +1,6 @@
 package com.ccp.simple.controller;
 
+import com.ccp.simple.domain.News;
 import com.ccp.simple.service.NewsService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -26,7 +28,7 @@ public class NewsApiController {
 
     private final NewsService newsService;
 
-    @GetMapping("/news")
+    @GetMapping("/newsCollect")
     public void collectNews() throws JsonProcessingException {
         String clientId = "DO2YnEI8qqODmwZOYP8N"; //애플리케이션 클라이언트 아이디
         String clientSecret = "6ilVZfSoiE"; //애플리케이션 클라이언트 시크릿
@@ -47,6 +49,11 @@ public class NewsApiController {
         String responseBody = get(apiURL,requestHeaders);
 
         newsService.insertNews(responseBody);
+    }
+
+    @GetMapping("/news")
+    public List<News> getAllNews() {
+        return newsService.getAllNews();
     }
 
     private static String get(String apiUrl, Map<String, String> requestHeaders){
