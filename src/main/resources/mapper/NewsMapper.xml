@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ccp.simple.mapper.NewsMapper">
+
+    <select id="getAllNews" resultType="com.ccp.simple.domain.News">
+        SELECT
+            NEWS_ID,
+            TITLE,
+            LINK,
+            DESCRIPTION,
+            PUB_DT,
+            CREATE_DT
+        FROM NEWS_INFO
+    </select>
+
+    <insert id="insertNews" parameterType="java.util.List">
+        INSERT INTO NEWS_INFO(
+            TITLE,
+            LINK,
+            DESCRIPTION,
+            PUB_DT
+        )
+        VALUES
+        <foreach collection="newsList" item="news" separator=",">
+        (
+             #{news.title},
+             #{news.link},
+             #{news.description},
+             #{news.pubDt}
+        )
+        </foreach>
+    </insert>
+</mapper>
