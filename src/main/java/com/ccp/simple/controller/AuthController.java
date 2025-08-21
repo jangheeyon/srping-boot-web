@@ -88,12 +88,17 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(Authentication authentication) {
-        if(authentication == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    public ResponseEntity<Map<String, String>> logout(Authentication authentication) {
+        if (authentication == null) {
+            Map<String, String> body = new HashMap<>();
+            body.put("message", "이미 로그아웃 상태입니다.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
         }
         String userId = authentication.getName();
         userService.updateRefreshToken(userId, null);
-        return ResponseEntity.ok().build();
+
+        Map<String, String> body = new HashMap<>();
+        body.put("message", "로그아웃 되었습니다.");
+        return ResponseEntity.ok(body);
     }
 }
