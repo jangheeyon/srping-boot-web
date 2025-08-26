@@ -1,6 +1,8 @@
 package com.ccp.simple.mapper;
 
+import com.ccp.simple.domain.Keyword;
 import com.ccp.simple.domain.News;
+import com.ccp.simple.dto.NewsResponseDto;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -8,7 +10,20 @@ import java.util.List;
 
 @Mapper
 public interface NewsMapper {
-    List<News> getAllNews();
+    List<NewsResponseDto> getAllNews();
 
-    void insertNews(@Param("newsList") List<News> newsList);
+    void insertNews(News news);
+
+    void insertNewsKeywordMapping(@Param("newsId") Long newsId, @Param("keywordId") Long keywordId);
+
+    boolean existsByLink(String link);
+
+    Long getNewsIdByLink(@Param("link") String link);
+
+    void insertKeyword(Keyword keyword);
+
+    List<Keyword> getAllKeywords();
+
+    void deleteKeyword(int keywordId);
+
 }

@@ -1,12 +1,11 @@
 package com.ccp.simple.scheduler;
 
+import com.ccp.simple.domain.Keyword;
 import com.ccp.simple.service.NewsService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.scheduling.annotation.Schedules;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.GetMapping;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,6 +17,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -30,22 +30,37 @@ public class NewsCollectScheduler {
         String clientId = "DO2YnEI8qqODmwZOYP8N"; //애플리케이션 클라이언트 아이디
         String clientSecret = "6ilVZfSoiE"; //애플리케이션 클라이언트 시크릿
 
-        String searchKeyword = "날씨";   // 검색어
-        if (searchKeyword == null || searchKeyword.isEmpty()) {
+        List<Keyword> allKeywords = newsService.getAllKeywords();
+        if (allKeywords.isEmpty()) {
             throw new RuntimeException("검색어가 비어 있습니다.");
         }
-        String encodeQuery = URLEncoder.encode(searchKeyword, StandardCharsets.UTF_8);
 
+        for (Keyword keyword : allKeywords) {
+            String searchKeyword = keyword.getKeyword();
 
-        String apiURL = "https://openapi.naver.com/v1/search/news?query=" + encodeQuery;
+            if (searchKeyword == null || searchKeyword.isEmpty()) {
+                continue;
+            }
 
-        Map<String, String> requestHeaders = new HashMap<>();
-        requestHeaders.put("X-Naver-Client-Id", clientId);
-        requestHeaders.put("X-Naver-Client-Secret", clientSecret);
+            try {
+                String encodeQuery = URLEncoder.encode(searchKeyword, StandardCharsets.UTF_8);
+                String apiURL = "https://openapi.naver.com/v1/search/news?query=" + encodeQuery;
 
-        String responseBody = get(apiURL,requestHeaders);
+                Map<String, String> requestHeaders = new HashMap<>();
+                requestHeaders.put("X-Naver-Client-Id", clientId);
+                requestHeaders.put("X-Naver-Client-Secret", clientSecret);
 
-        newsService.insertNews(responseBody);
+                String responseBody = get(apiURL, requestHeaders);
+
+                newsService.insertNews(responseBody, keyword.getKeywordId());
+
+                // API 호출 간 1~2초 지연 (호출 제한 방지)
+                Thread.sleep(1500);
+
+            } catch (Exception e) {
+                System.err.println("[" + searchKeyword + "] 뉴스 수집 중 오류 발생: " + e.getMessage());
+            }
+        }
     }
 
     private static String get(String apiUrl, Map<String, String> requestHeaders){
