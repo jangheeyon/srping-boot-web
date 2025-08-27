@@ -39,7 +39,7 @@
             <if test="userName != null and userName != ''">
                 USER_NAME = #{userName},
             </if>
-            <if test="role != null and role != ''">
+            <if test="role != null">
                 ROLE = #{role},
             </if>
             <if test="refreshToken != null and refreshToken != ''">

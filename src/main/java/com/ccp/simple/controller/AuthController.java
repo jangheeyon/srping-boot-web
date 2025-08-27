@@ -1,5 +1,6 @@
 package com.ccp.simple.controller;
 
+import com.ccp.simple.domain.Role;
 import com.ccp.simple.domain.User;
 import com.ccp.simple.dto.LoginRequestDto;
 import com.ccp.simple.security.JwtTokenProvider;
@@ -32,7 +33,7 @@ public class AuthController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
         }
         User user = userService.getUserById(request.getUserId());
-        String role = user.getRole();
+        Role role = user.getRole();
         String accessToken = jwtTokenProvider.createToken(request.getUserId(), role);
         String refreshToken = jwtTokenProvider.createRefreshToken(request.getUserId());
 
@@ -79,7 +80,7 @@ public class AuthController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Refresh token mismatch");
         }
 
-        String role = user.getRole();
+        Role role = user.getRole();
         String newAccessToken = jwtTokenProvider.createToken(userId, role);
 
         Map<String, String> tokens = new HashMap<>();

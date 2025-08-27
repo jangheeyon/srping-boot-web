@@ -1,5 +1,6 @@
 package com.ccp.simple.controller;
 
+import com.ccp.simple.domain.Role;
 import com.ccp.simple.domain.User;
 import com.ccp.simple.dto.RegisterUserRequestDto;
 import com.ccp.simple.dto.UpdateUserRequestDto;
@@ -35,7 +36,7 @@ public class UserController {
         user.setUserId(updateUserRequestDto.getUserId());
         user.setUserPassword(updateUserRequestDto.getUserPassword());
         user.setUserName(updateUserRequestDto.getUserName());
-        user.setRole(updateUserRequestDto.getRole());
+        user.setRole(Role.valueOf(updateUserRequestDto.getRole()));
        userService.updateUser(user);
     }
 
@@ -52,7 +53,7 @@ public class UserController {
         user.setUserId(dto.getUserId());
         user.setUserName(dto.getUserName());
         user.setUserPassword(dto.getUserPassword());
-        user.setRole(dto.getRole());
+        user.setRole(Role.valueOf(dto.getRole()));
         userService.insertUser(user);
         return ResponseEntity.ok("회원가입 성공");
     }

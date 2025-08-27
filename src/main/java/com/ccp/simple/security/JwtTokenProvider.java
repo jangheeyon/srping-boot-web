@@ -1,5 +1,6 @@
 package com.ccp.simple.security;
 
+import com.ccp.simple.domain.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -16,9 +17,9 @@ public class JwtTokenProvider {
     private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
     private final long validityInMilliseconds = 3600000; // 1시간
 
-    public String createToken(String userId, String role) {
+    public String createToken(String userId, Role role) {
         Claims claims = Jwts.claims().setSubject(userId);
-        claims.put("role", role);   //권한 정보 추가
+        claims.put("role", role.getKey());   //권한 정보 추가
 
         Date now = new Date();
         Date validity = new Date(now.getTime() + validityInMilliseconds);
