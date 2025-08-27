@@ -16,6 +16,8 @@ public interface NewsMapper {
 
     void insertNewsKeywordMapping(@Param("newsId") Long newsId, @Param("keywordId") Long keywordId);
 
+    void updateNewsVisibility(@Param("newsId") Long newsId, @Param("visible") boolean visible);
+
     boolean existsByLink(String link);
 
     Long getNewsIdByLink(@Param("link") String link);

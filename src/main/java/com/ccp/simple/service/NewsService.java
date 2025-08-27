@@ -11,6 +11,8 @@ public interface NewsService {
 
     void insertNews(String responseBody, Long keywordId) throws JsonProcessingException;
 
+    void updateNewsVisibility(Long newsId, boolean visible);
+
     void insertKeyword(Keyword keyword);
 
     List<Keyword> getAllKeywords();

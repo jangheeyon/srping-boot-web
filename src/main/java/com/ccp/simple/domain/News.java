@@ -14,4 +14,5 @@ public class News {
     private String description;
     private LocalDateTime pubDt;
     private LocalDateTime createDt;
+    private boolean visible = true; // 기본값을 true로 설정
 }

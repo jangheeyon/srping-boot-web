@@ -12,4 +12,5 @@ public class NewsResponseDto {
     private String description;
     private LocalDateTime pubDt;
     private String keywords;
+    private boolean visible;
 }

@@ -56,6 +56,11 @@ public class NewsServiceImpl implements NewsService {
     }
 
     @Override
+    public void updateNewsVisibility(Long newsId, boolean visible) {
+        newsMapper.updateNewsVisibility(newsId, visible);
+    }
+
+    @Override
     public void insertKeyword(Keyword keyword) {
         newsMapper.insertKeyword(keyword);
     }

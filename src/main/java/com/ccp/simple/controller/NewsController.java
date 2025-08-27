@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -21,6 +22,17 @@ public class NewsController {
     @GetMapping("/news")
     public List<NewsResponseDto> getAllNews() {
         return newsService.getAllNews();
+    }
+
+    // (관리자) 뉴스 숨김/공개 처리
+    @PatchMapping("/admin/news/{newsId}")
+    public ResponseEntity<String> updateNewsVisibility(@PathVariable Long newsId, @RequestBody Map<String, Boolean> payload) {
+        Boolean visible = payload.get("visible");
+        if (visible == null) {
+            return ResponseEntity.badRequest().body("\"visible\" 필드가 필요합니다.");
+        }
+        newsService.updateNewsVisibility(newsId, visible);
+        return ResponseEntity.ok("뉴스 상태가 변경되었습니다.");
     }
 
     //키워드 등록
