@@ -4,6 +4,10 @@ spring:
     url: jdbc:postgresql://dpg-d2ddbtogjchc73djg6a0-a.singapore-postgres.render.com:5432/simple_iltf
     username: simple_iltf_user
     password: r0wIZhk0jQfnrezBZlfH6Xrv0myK9pH3
+  data:
+    redis:
+      host: localhost
+      port: 6379
 
 mybatis:
   mapper-locations: classpath:/mapper/**/*.xml

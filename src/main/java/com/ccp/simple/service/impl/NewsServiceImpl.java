@@ -10,7 +10,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -20,7 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class NewsServiceImpl implements NewsService {
     private final NewsMapper newsMapper;
-
+    private final RedisTemplate<String, String> redisTemplate;
 
     @Override
     public List<NewsResponseDto> getAllNews() {
@@ -28,6 +30,7 @@ public class NewsServiceImpl implements NewsService {
     }
 
     @Override
+    @Transactional
     public void insertNews(String responseBody, Long keywordId) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode itemList = objectMapper.readTree(responseBody).get("items");
@@ -58,6 +61,25 @@ public class NewsServiceImpl implements NewsService {
     @Override
     public void updateNewsVisibility(Long newsId, boolean visible) {
         newsMapper.updateNewsVisibility(newsId, visible);
+    }
+
+    @Override
+    public boolean toggleLike(String userId, Long newsId) {
+        String likeKey = "news:like:" + newsId;
+        Boolean isMember = redisTemplate.opsForSet().isMember(likeKey, userId);
+
+        if (Boolean.TRUE.equals(isMember)) {
+            redisTemplate.opsForSet().remove(likeKey, userId);
+            return false; // 좋아요 취소
+        } else {
+            redisTemplate.opsForSet().add(likeKey, userId);
+            return true; // 좋아요 추가
+        }
+    }
+
+    @Override
+    public void updateLikeCount(Long newsId, int likeCount) {
+        newsMapper.updateLikeCount(newsId, likeCount);
     }
 
     @Override

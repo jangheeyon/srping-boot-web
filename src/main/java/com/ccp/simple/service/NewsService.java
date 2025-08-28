@@ -13,6 +13,10 @@ public interface NewsService {
 
     void updateNewsVisibility(Long newsId, boolean visible);
 
+    boolean toggleLike(String userId, Long newsId);
+
+    void updateLikeCount(Long newsId, int likeCount);
+
     void insertKeyword(Keyword keyword);
 
     List<Keyword> getAllKeywords();

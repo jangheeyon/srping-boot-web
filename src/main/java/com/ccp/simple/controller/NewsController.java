@@ -6,8 +6,10 @@ import com.ccp.simple.dto.RegisterKeywordRequestDto;
 import com.ccp.simple.service.NewsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +35,19 @@ public class NewsController {
         }
         newsService.updateNewsVisibility(newsId, visible);
         return ResponseEntity.ok("뉴스 상태가 변경되었습니다.");
+    }
+
+    // 뉴스 좋아요 토글
+    @PostMapping("/news/{newsId}/like")
+    public ResponseEntity<Map<String, Object>> toggleLike(@PathVariable Long newsId, Authentication authentication) {
+        String userId = authentication.getName(); // 현재 로그인한 사용자 ID
+        boolean isLiked = newsService.toggleLike(userId, newsId);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("isLiked", isLiked);
+        response.put("message", isLiked ? "좋아요를 눌렀습니다." : "좋아요를 취소했습니다.");
+
+        return ResponseEntity.ok(response);
     }
 
     //키워드 등록

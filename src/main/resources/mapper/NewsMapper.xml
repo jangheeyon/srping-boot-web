@@ -11,17 +11,24 @@
                n.description,
                n.pub_dt,
                string_agg(k.keyword, ', ') AS keywords,
-               n.visible
+               n.visible,
+               n.like_count
         FROM NEWS_INFO n
-                 JOIN NEWS_KEYWORD_MAPPING m ON n.news_id = m.news_id
-                 JOIN KEYWORD_INFO k ON m.keyword_id = k.keyword_id
-        GROUP BY n.news_id, n.title, n.link, n.description, n.pub_dt
+                 LEFT JOIN NEWS_KEYWORD_MAPPING m ON n.news_id = m.news_id
+                 LEFT JOIN KEYWORD_INFO k ON m.keyword_id = k.keyword_id
+        GROUP BY n.news_id, n.title, n.link, n.description, n.pub_dt, n.visible, n.like_count
         ORDER BY n.pub_dt DESC
     </select>
 
     <update id="updateNewsVisibility">
         UPDATE NEWS_INFO
         SET visible = #{visible}
+        WHERE news_id = #{newsId}
+    </update>
+
+    <update id="updateLikeCount">
+        UPDATE NEWS_INFO
+        SET like_count = #{likeCount}
         WHERE news_id = #{newsId}
     </update>
 
@@ -95,4 +102,22 @@
         FROM KEYWORD_INFO
         WHERE KEYWORD_ID = #{keywordId}
     </delete>
+
+    <!-- 좋아요 기능 -->
+    <select id="findLike" resultType="com.ccp.simple.domain.UserNewsLike">
+        SELECT user_id, news_id
+        FROM USER_NEWS_LIKE
+        WHERE user_id = #{userId} AND news_id = #{newsId}
+    </select>
+
+    <insert id="insertLike">
+        INSERT INTO USER_NEWS_LIKE (user_id, news_id)
+        VALUES (#{userId}, #{newsId})
+    </insert>
+
+    <delete id="deleteLike">
+        DELETE FROM USER_NEWS_LIKE
+        WHERE user_id = #{userId} AND news_id = #{newsId}
+    </delete>
+
 </mapper>
