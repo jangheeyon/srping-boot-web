@@ -64,16 +64,21 @@ public class NewsServiceImpl implements NewsService {
     }
 
     @Override
+    @Transactional
     public boolean toggleLike(String userId, Long newsId) {
         String likeKey = "news:like:" + newsId;
         Boolean isMember = redisTemplate.opsForSet().isMember(likeKey, userId);
 
         if (Boolean.TRUE.equals(isMember)) {
+            // 좋아요 취소
             redisTemplate.opsForSet().remove(likeKey, userId);
-            return false; // 좋아요 취소
+            newsMapper.deleteLike(userId, newsId);
+            return false;
         } else {
+            // 좋아요 추가
             redisTemplate.opsForSet().add(likeKey, userId);
-            return true; // 좋아요 추가
+            newsMapper.insertLike(userId, newsId);
+            return true;
         }
     }
 

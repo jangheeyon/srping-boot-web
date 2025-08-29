@@ -103,13 +103,6 @@
         WHERE KEYWORD_ID = #{keywordId}
     </delete>
 
-    <!-- 좋아요 기능 -->
-    <select id="findLike" resultType="com.ccp.simple.domain.UserNewsLike">
-        SELECT user_id, news_id
-        FROM USER_NEWS_LIKE
-        WHERE user_id = #{userId} AND news_id = #{newsId}
-    </select>
-
     <insert id="insertLike">
         INSERT INTO USER_NEWS_LIKE (user_id, news_id)
         VALUES (#{userId}, #{newsId})

@@ -31,9 +31,6 @@ public interface NewsMapper {
 
     void deleteKeyword(int keywordId);
 
-    // 좋아요 기능
-    UserNewsLike findLike(@Param("userId") String userId, @Param("newsId") Long newsId);
-
     void insertLike(@Param("userId") String userId, @Param("newsId") Long newsId);
 
     void deleteLike(@Param("userId") String userId, @Param("newsId") Long newsId);
