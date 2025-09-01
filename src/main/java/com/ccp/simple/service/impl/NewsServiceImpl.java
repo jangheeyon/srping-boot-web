@@ -11,6 +11,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,7 +29,30 @@ public class NewsServiceImpl implements NewsService {
 
     @Override
     public List<NewsResponseDto> getAllNews() {
-        return newsMapper.getAllNews();
+        String userId = null;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            userId = authentication.getName();
+        }
+
+        List<NewsResponseDto> newsList = newsMapper.getAllNews();
+
+        for (NewsResponseDto news : newsList) {
+            String likeKey = "news:like:" + news.getNewsId();
+
+            // Redis에서 실시간 좋아요 개수 가져오기
+            Long likeCount = redisTemplate.opsForSet().size(likeKey);
+            news.setLikeCount(likeCount != null ? likeCount.intValue() : 0);
+
+            // 현재 사용자가 좋아요를 눌렀는지 확인
+            if (userId != null) {
+                Boolean isMember = redisTemplate.opsForSet().isMember(likeKey, userId);
+                news.setLiked(Boolean.TRUE.equals(isMember));
+            } else {
+                news.setLiked(false); // 로그인하지 않은 사용자는 항상 false
+            }
+        }
+        return newsList;
     }
 
     @Override
@@ -70,14 +96,22 @@ public class NewsServiceImpl implements NewsService {
         Boolean isMember = redisTemplate.opsForSet().isMember(likeKey, userId);
 
         if (Boolean.TRUE.equals(isMember)) {
-            // 좋아요 취소
+            // Redis 좋아요 취소
             redisTemplate.opsForSet().remove(likeKey, userId);
-            newsMapper.deleteLike(userId, newsId);
+            // newsMapper.deleteLike(userId, newsId);
+
+            String countKey = "news:like_count:" + newsId;
+            redisTemplate.opsForValue().decrement(countKey);
+
             return false;
         } else {
-            // 좋아요 추가
+            // Redis 좋아요 추가
             redisTemplate.opsForSet().add(likeKey, userId);
-            newsMapper.insertLike(userId, newsId);
+            // newsMapper.insertLike(userId, newsId);
+
+            String countKey = "news:like_count:" + newsId;
+            redisTemplate.opsForValue().increment(countKey);
+
             return true;
         }
     }

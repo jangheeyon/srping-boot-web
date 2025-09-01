@@ -41,11 +41,11 @@ public class NewsController {
     @PostMapping("/news/{newsId}/like")
     public ResponseEntity<Map<String, Object>> toggleLike(@PathVariable Long newsId, Authentication authentication) {
         String userId = authentication.getName(); // 현재 로그인한 사용자 ID
-        boolean isLiked = newsService.toggleLike(userId, newsId);
+        boolean liked = newsService.toggleLike(userId, newsId);
 
         Map<String, Object> response = new HashMap<>();
-        response.put("isLiked", isLiked);
-        response.put("message", isLiked ? "좋아요를 눌렀습니다." : "좋아요를 취소했습니다.");
+        response.put("liked", liked);
+        response.put("message", liked ? "좋아요를 눌렀습니다." : "좋아요를 취소했습니다.");
 
         return ResponseEntity.ok(response);
     }

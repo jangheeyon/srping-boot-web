@@ -14,4 +14,5 @@ public class NewsResponseDto {
     private String keywords;
     private boolean visible;
     private int likeCount;
+    private boolean liked;
 }
