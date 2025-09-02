@@ -1,5 +1,6 @@
 package com.ccp.simple.service;
 
+import com.ccp.simple.document.NewsDocument;
 import com.ccp.simple.domain.Keyword;
 import com.ccp.simple.dto.NewsResponseDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -16,6 +17,8 @@ public interface NewsService {
     boolean toggleLike(String userId, Long newsId);
 
     void updateLikeCount(Long newsId, int likeCount);
+
+    List<NewsDocument> searchNews(String query);
 
     void insertKeyword(Keyword keyword);
 
