@@ -13,6 +13,8 @@ import java.util.List;
 public interface NewsMapper {
     List<NewsResponseDto> getAllNews();
 
+    List<NewsResponseDto> findNewsByIds(List<Long> ids);
+
     void insertNews(News news);
 
     void insertNewsKeywordMapping(@Param("newsId") Long newsId, @Param("keywordId") Long keywordId);
@@ -30,8 +32,4 @@ public interface NewsMapper {
     List<Keyword> getAllKeywords();
 
     void deleteKeyword(int keywordId);
-
-    void insertLike(@Param("userId") String userId, @Param("newsId") Long newsId);
-
-    void deleteLike(@Param("userId") String userId, @Param("newsId") Long newsId);
 }

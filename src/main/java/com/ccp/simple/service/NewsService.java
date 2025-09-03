@@ -18,7 +18,7 @@ public interface NewsService {
 
     void updateLikeCount(Long newsId, int likeCount);
 
-    List<NewsDocument> searchNews(String query);
+    List<NewsResponseDto> searchNews(String query);
 
     void insertKeyword(Keyword keyword);
 

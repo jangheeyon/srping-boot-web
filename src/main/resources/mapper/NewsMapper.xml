@@ -16,8 +16,27 @@
         FROM NEWS_INFO n
                  LEFT JOIN NEWS_KEYWORD_MAPPING m ON n.news_id = m.news_id
                  LEFT JOIN KEYWORD_INFO k ON m.keyword_id = k.keyword_id
-        GROUP BY n.news_id, n.title, n.link, n.description, n.pub_dt, n.visible
+        GROUP BY n.news_id, n.title, n.link, n.description, n.pub_dt, n.visible, n.like_count
         ORDER BY n.pub_dt DESC
+    </select>
+
+    <select id="findNewsByIds" resultType="com.ccp.simple.dto.NewsResponseDto">
+        SELECT n.news_id,
+               n.title,
+               n.link,
+               n.description,
+               n.pub_dt,
+               string_agg(k.keyword, ', ') AS keywords,
+               n.visible,
+               n.like_count
+        FROM NEWS_INFO n
+                 LEFT JOIN NEWS_KEYWORD_MAPPING m ON n.news_id = m.news_id
+                 LEFT JOIN KEYWORD_INFO k ON m.keyword_id = k.keyword_id
+        WHERE n.news_id IN
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        GROUP BY n.news_id, n.title, n.link, n.description, n.pub_dt, n.visible, n.like_count
     </select>
 
     <update id="updateNewsVisibility">
@@ -102,19 +121,4 @@
         FROM KEYWORD_INFO
         WHERE KEYWORD_ID = #{keywordId}
     </delete>
-
-    <insert id="insertLike">
-        INSERT INTO USER_NEWS_LIKE (user_id, news_id)
-        VALUES
-        <foreach collection="list" item="item" separator=",">
-            (#{item.userId}, #{item.newsId})
-        </foreach>
-        ON CONFLICT (user_id, news_id) DO NOTHING
-    </insert>
-
-    <delete id="deleteLike">
-        DELETE FROM USER_NEWS_LIKE
-        WHERE user_id = #{userId} AND news_id = #{newsId}
-    </delete>
-
 </mapper>

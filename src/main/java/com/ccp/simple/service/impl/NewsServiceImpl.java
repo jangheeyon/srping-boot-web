@@ -1,5 +1,6 @@
 package com.ccp.simple.service.impl;
 
+import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import com.ccp.simple.document.NewsDocument;
 import com.ccp.simple.domain.Keyword;
 import com.ccp.simple.domain.News;
@@ -15,6 +16,7 @@ import org.jsoup.Jsoup;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.Authentication;
@@ -24,7 +26,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -104,22 +109,49 @@ public class NewsServiceImpl implements NewsService {
     }
 
     @Override
-    public List<NewsDocument> searchNews(String query) {
+    public List<NewsResponseDto> searchNews(String query) {
+        // 1. Elasticsearch에서 관련도 순으로 정렬된 NewsDocument 검색
         NativeQuery nativeQuery = new NativeQueryBuilder()
-                .withQuery(q -> q
-                        .multiMatch(mmq -> mmq
-                                .fields("title", "description")
-                                .query(query)
-                        )
-                )
+                .withQuery(q -> q.multiMatch(mmq -> mmq.fields("title", "description").query(query)))
                 .build();
-
-        // 2. 검색 실행
         SearchHits<NewsDocument> searchHits = elasticsearchOperations.search(nativeQuery, NewsDocument.class);
 
-        // 3. 결과 반환
-        return searchHits.getSearchHits().stream()
-                .map(hit -> hit.getContent())
+        // 2. 검색 결과에서 newsId 목록을 '관련도 순서대로' 추출
+        List<Long> newsIds = searchHits.getSearchHits().stream()
+                .map(SearchHit::getContent)
+                .map(NewsDocument::getNewsId)
+                .collect(Collectors.toList());
+
+        if (newsIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // 3. 추출된 ID 목록을 사용하여 DB에서 뉴스 정보를 한 번에 조회 (N+1 문제 방지)
+        Map<Long, NewsResponseDto> newsDtoMap = newsMapper.findNewsByIds(newsIds).stream()
+                .collect(Collectors.toMap(NewsResponseDto::getNewsId, Function.identity()));
+
+        // 4. Redis에서 실시간 좋아요 정보 보강
+        String userId = null;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            userId = authentication.getName();
+        }
+
+        for (NewsResponseDto news : newsDtoMap.values()) {
+            String likeKey = "news:like:" + news.getNewsId();
+            Long likeCount = redisTemplate.opsForSet().size(likeKey);
+            news.setLikeCount(likeCount != null ? likeCount.intValue() : 0);
+
+            if (userId != null) {
+                news.setLiked(Boolean.TRUE.equals(redisTemplate.opsForSet().isMember(likeKey, userId)));
+            } else {
+                news.setLiked(false);
+            }
+        }
+
+        // 5. Elasticsearch의 '관련도 순서'를 유지하면서 최종 데이터 조립
+        return newsIds.stream()
+                .map(newsDtoMap::get)
                 .collect(Collectors.toList());
     }
 

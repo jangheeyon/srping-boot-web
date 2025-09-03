@@ -1,6 +1,5 @@
 package com.ccp.simple.controller;
 
-import com.ccp.simple.document.NewsDocument;
 import com.ccp.simple.domain.Keyword;
 import com.ccp.simple.dto.NewsResponseDto;
 import com.ccp.simple.dto.RegisterKeywordRequestDto;
@@ -29,8 +28,9 @@ public class NewsController {
 
     // 뉴스 검색
     @GetMapping("/news/search")
-    public List<NewsDocument> searchNews(@RequestParam("q") String query) {
-        return newsService.searchNews(query);
+    public List<NewsResponseDto> searchNews(@RequestParam("q") String query) {
+        List<NewsResponseDto> newsResponseDtos = newsService.searchNews(query);
+        return newsResponseDtos;
     }
 
     // (관리자) 뉴스 숨김/공개 처리
