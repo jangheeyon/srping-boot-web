@@ -29,8 +29,13 @@ public class NewsController {
     // 뉴스 검색
     @GetMapping("/news/search")
     public List<NewsResponseDto> searchNews(@RequestParam("q") String query) {
-        List<NewsResponseDto> newsResponseDtos = newsService.searchNews(query);
-        return newsResponseDtos;
+        return newsService.searchNews(query);
+    }
+
+    // 유사 뉴스 추천
+    @GetMapping("/news/{newsId}/similar")
+    public List<NewsResponseDto> searchSimilarNews(@PathVariable Long newsId) {
+        return newsService.searchSimilarNews(newsId);
     }
 
     // (관리자) 뉴스 숨김/공개 처리

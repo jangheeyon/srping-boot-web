@@ -1,6 +1,6 @@
 package com.ccp.simple.service.impl;
 
-import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import com.ccp.simple.document.NewsDocument;
 import com.ccp.simple.domain.Keyword;
 import com.ccp.simple.domain.News;
@@ -26,13 +26,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class NewsServiceImpl implements NewsService {
     private final NewsMapper newsMapper;
@@ -42,34 +39,13 @@ public class NewsServiceImpl implements NewsService {
 
     @Override
     public List<NewsResponseDto> getAllNews() {
-        String userId = null;
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated()) {
-            userId = authentication.getName();
-        }
-
+        String userId = checkUserId();
         List<NewsResponseDto> newsList = newsMapper.getAllNews();
-
-        for (NewsResponseDto news : newsList) {
-            String likeKey = "news:like:" + news.getNewsId();
-
-            // Redis에서 실시간 좋아요 개수 가져오기
-            Long likeCount = redisTemplate.opsForSet().size(likeKey);
-            news.setLikeCount(likeCount != null ? likeCount.intValue() : 0);
-
-            // 현재 사용자가 좋아요를 눌렀는지 확인
-            if (userId != null) {
-                Boolean isMember = redisTemplate.opsForSet().isMember(likeKey, userId);
-                news.setLiked(Boolean.TRUE.equals(isMember));
-            } else {
-                news.setLiked(false); // 로그인하지 않은 사용자는 항상 false
-            }
-        }
+        matchEsResultsWithRedisData(newsList, userId);
         return newsList;
     }
 
     @Override
-    @Transactional
     public void insertNews(String responseBody, Long keywordId) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode itemList = objectMapper.readTree(responseBody).get("items");
@@ -100,7 +76,6 @@ public class NewsServiceImpl implements NewsService {
                         .pubDt(news.getPubDt())
                         .build();
                 newsSearchRepository.save(newsDocument);
-
             } else {
                 newsId = newsMapper.getNewsIdByLink(link);
             }
@@ -110,49 +85,27 @@ public class NewsServiceImpl implements NewsService {
 
     @Override
     public List<NewsResponseDto> searchNews(String query) {
-        // 1. Elasticsearch에서 관련도 순으로 정렬된 NewsDocument 검색
-        NativeQuery nativeQuery = new NativeQueryBuilder()
-                .withQuery(q -> q.multiMatch(mmq -> mmq.fields("title", "description").query(query)))
+        Query esQuery = new Query.Builder()
+                //mmq : multi_match
+                .multiMatch(mmq -> mmq
+                        .fields("title", "description")
+                        .query(query)
+                )
                 .build();
-        SearchHits<NewsDocument> searchHits = elasticsearchOperations.search(nativeQuery, NewsDocument.class);
+        return searchElasticsearch(esQuery);
+    }
 
-        // 2. 검색 결과에서 newsId 목록을 '관련도 순서대로' 추출
-        List<Long> newsIds = searchHits.getSearchHits().stream()
-                .map(SearchHit::getContent)
-                .map(NewsDocument::getNewsId)
-                .collect(Collectors.toList());
-
-        if (newsIds.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        // 3. 추출된 ID 목록을 사용하여 DB에서 뉴스 정보를 한 번에 조회 (N+1 문제 방지)
-        Map<Long, NewsResponseDto> newsDtoMap = newsMapper.findNewsByIds(newsIds).stream()
-                .collect(Collectors.toMap(NewsResponseDto::getNewsId, Function.identity()));
-
-        // 4. Redis에서 실시간 좋아요 정보 보강
-        String userId = null;
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated()) {
-            userId = authentication.getName();
-        }
-
-        for (NewsResponseDto news : newsDtoMap.values()) {
-            String likeKey = "news:like:" + news.getNewsId();
-            Long likeCount = redisTemplate.opsForSet().size(likeKey);
-            news.setLikeCount(likeCount != null ? likeCount.intValue() : 0);
-
-            if (userId != null) {
-                news.setLiked(Boolean.TRUE.equals(redisTemplate.opsForSet().isMember(likeKey, userId)));
-            } else {
-                news.setLiked(false);
-            }
-        }
-
-        // 5. Elasticsearch의 '관련도 순서'를 유지하면서 최종 데이터 조립
-        return newsIds.stream()
-                .map(newsDtoMap::get)
-                .collect(Collectors.toList());
+    @Override
+    public List<NewsResponseDto> searchSimilarNews(Long newsId) {
+        Query esQuery = new Query.Builder()
+                .moreLikeThis(mlt -> mlt
+                        .fields("title", "description")
+                        .like(l -> l.document(d -> d.index("news").id(String.valueOf(newsId))))
+                        .minTermFreq(1)
+                        .minDocFreq(1)
+                )
+                .build();
+        return searchElasticsearch(esQuery);
     }
 
     @Override
@@ -169,8 +122,6 @@ public class NewsServiceImpl implements NewsService {
         if (Boolean.TRUE.equals(isMember)) {
             // Redis 좋아요 취소
             redisTemplate.opsForSet().remove(likeKey, userId);
-            // newsMapper.deleteLike(userId, newsId);
-
             String countKey = "news:like_count:" + newsId;
             redisTemplate.opsForValue().decrement(countKey);
 
@@ -178,8 +129,6 @@ public class NewsServiceImpl implements NewsService {
         } else {
             // Redis 좋아요 추가
             redisTemplate.opsForSet().add(likeKey, userId);
-            // newsMapper.insertLike(userId, newsId);
-
             String countKey = "news:like_count:" + newsId;
             redisTemplate.opsForValue().increment(countKey);
 
@@ -205,5 +154,71 @@ public class NewsServiceImpl implements NewsService {
     @Override
     public void deleteKeyword(int keywordId) {
         newsMapper.deleteKeyword(keywordId);
+    }
+
+    //유저 확인
+    private String checkUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            return authentication.getName();
+        }
+        return null;
+    }
+
+    //좋아요 수 매칭
+    private void matchEsResultsWithRedisData(List<NewsResponseDto> newsList, String userId) {
+        for (NewsResponseDto news : newsList) {
+            String likeKey = "news:like:" + news.getNewsId();
+            Long likeCount = redisTemplate.opsForSet().size(likeKey);
+            news.setLikeCount(likeCount != null ? likeCount.intValue() : 0);
+
+            if (userId != null) {
+                news.setLiked(Boolean.TRUE.equals(redisTemplate.opsForSet().isMember(likeKey, userId)));
+            } else {
+                news.setLiked(false);
+            }
+        }
+    }
+
+    //엘라스틱서치 검색
+    private List<NewsResponseDto> searchElasticsearch(Query esQuery) {
+        NativeQuery nativeQuery = new NativeQueryBuilder().withQuery(esQuery).build();
+        SearchHits<NewsDocument> searchHits = elasticsearchOperations.search(nativeQuery, NewsDocument.class);
+
+        List<Long> newsIds = new ArrayList<>();
+        //searchHits에서 newsIds를 반환
+        for(SearchHit<NewsDocument> hit : searchHits.getSearchHits()) {
+            NewsDocument content = hit.getContent();
+            newsIds.add(content.getNewsId());
+        }
+        return orderResults(newsIds);
+    }
+
+    // 결과 유사도 정렬 유지
+    private List<NewsResponseDto> orderResults(List<Long> newsIds) {
+        if (newsIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Map<Long, NewsResponseDto> newsDtoMap = new HashMap<>();
+        List<NewsResponseDto> newsByIds = newsMapper.findNewsByIds(newsIds);
+
+        for (NewsResponseDto newsDto : newsByIds) {
+            newsDtoMap.put(newsDto.getNewsId(), newsDto);
+        }
+
+        List<NewsResponseDto> newsList = (List<NewsResponseDto>) newsDtoMap.values();
+        String userId = checkUserId();
+        matchEsResultsWithRedisData(newsList, userId);
+
+        List<NewsResponseDto> resultList = new ArrayList<>();
+        //검색결과 유사도 정렬 유지
+        for (Long newsId : newsIds) {
+            NewsResponseDto newsDto = newsDtoMap.get(newsId);
+            if (newsDto != null) {
+                resultList.add(newsDto);
+            }
+        }
+        return resultList;
     }
 }
