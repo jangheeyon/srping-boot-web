@@ -121,4 +121,40 @@
         FROM KEYWORD_INFO
         WHERE KEYWORD_ID = #{keywordId}
     </delete>
+
+    <insert id="insertLike">
+        INSERT INTO USER_NEWS_LIKE (user_id, news_id)
+        VALUES (#{userId}, #{newsId})
+    </insert>
+
+    <delete id="deleteLike">
+        DELETE FROM USER_NEWS_like
+        WHERE user_id = #{userId} AND news_id = #{newsId}
+    </delete>
+
+    <select id="searchSimilarUsers" resultType="string">
+        SELECT u2.user_id
+        FROM user_news_like u1
+        JOIN user_news_like u2 ON u1.news_id = u2.news_id AND u1.user_id != u2.user_id
+        WHERE u1.user_id = #{userId}
+        GROUP BY u2.user_id
+        ORDER BY COUNT(*) DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="searchNewsIdsBySimilarUsers" resultType="long">
+        SELECT DISTINCT news_id
+        FROM user_news_like
+        WHERE user_id IN
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="searchLikedNewsIdsByUser" resultType="long">
+        SELECT news_id
+        FROM user_news_like
+        WHERE user_id = #{userId}
+    </select>
+
 </mapper>

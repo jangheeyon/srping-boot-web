@@ -2,7 +2,6 @@ package com.ccp.simple.mapper;
 
 import com.ccp.simple.domain.Keyword;
 import com.ccp.simple.domain.News;
-import com.ccp.simple.domain.UserNewsLike;
 import com.ccp.simple.dto.NewsResponseDto;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -32,4 +31,14 @@ public interface NewsMapper {
     List<Keyword> getAllKeywords();
 
     void deleteKeyword(int keywordId);
+
+    void insertLike(@Param("userId") String userId, @Param("newsId") Long newsId);
+
+    void deleteLike(@Param("userId") String userId, @Param("newsId") Long newsId);
+
+    List<String> searchSimilarUsers(@Param("userId") String userId, @Param("limit") int limit);
+
+    List<Long> searchNewsIdsBySimilarUsers(@Param("list") List<String> userIds);
+
+    List<Long> searchLikedNewsIdsByUser(@Param("userId") String userId);
 }

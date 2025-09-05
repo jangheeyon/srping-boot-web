@@ -27,6 +27,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -120,18 +122,14 @@ public class NewsServiceImpl implements NewsService {
         Boolean isMember = redisTemplate.opsForSet().isMember(likeKey, userId);
 
         if (Boolean.TRUE.equals(isMember)) {
-            // Redis 좋아요 취소
+            // 좋아요 취소
             redisTemplate.opsForSet().remove(likeKey, userId);
-            String countKey = "news:like_count:" + newsId;
-            redisTemplate.opsForValue().decrement(countKey);
-
+            newsMapper.deleteLike(userId, newsId);
             return false;
         } else {
-            // Redis 좋아요 추가
+            // 좋아요 추가
             redisTemplate.opsForSet().add(likeKey, userId);
-            String countKey = "news:like_count:" + newsId;
-            redisTemplate.opsForValue().increment(countKey);
-
+            newsMapper.insertLike(userId, newsId);
             return true;
         }
     }

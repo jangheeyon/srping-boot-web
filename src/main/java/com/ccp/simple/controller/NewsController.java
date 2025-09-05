@@ -4,6 +4,7 @@ import com.ccp.simple.domain.Keyword;
 import com.ccp.simple.dto.NewsResponseDto;
 import com.ccp.simple.dto.RegisterKeywordRequestDto;
 import com.ccp.simple.service.NewsService;
+import com.ccp.simple.service.RecommendationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -19,6 +20,7 @@ import java.util.Map;
 public class NewsController {
 
     private final NewsService newsService;
+    private final RecommendationService recommendationService; // 추천 서비스 주입
 
     // 뉴스 목록 조회
     @GetMapping("/news")
@@ -36,6 +38,13 @@ public class NewsController {
     @GetMapping("/news/{newsId}/similar")
     public List<NewsResponseDto> searchSimilarNews(@PathVariable Long newsId) {
         return newsService.searchSimilarNews(newsId);
+    }
+
+    // 개인화 추천
+    @GetMapping("/news/recommend")
+    public List<NewsResponseDto> getRecommendations(Authentication authentication) {
+        String userId = authentication.getName();
+        return recommendationService.recommendNewsBySimilarUsers(userId, 10); // 상위 10개 추천
     }
 
     // (관리자) 뉴스 숨김/공개 처리
