@@ -2,6 +2,7 @@ package com.ccp.simple.mapper;
 
 import com.ccp.simple.domain.Keyword;
 import com.ccp.simple.domain.News;
+import com.ccp.simple.dto.KeywordCountDto;
 import com.ccp.simple.dto.NewsResponseDto;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -45,7 +46,9 @@ public interface NewsMapper {
     List<Long> searchLikedNewsIdsByUser(@Param("userId") String userId);
 
     // 통계용
-    List<NewsResponseDto> findTopLikedNews(@Param("limit") int limit);
+    List<NewsResponseDto> getTopLikedNews(@Param("limit") int limit);
 
-    List<NewsResponseDto> findTopViewedNews(@Param("limit") int limit);
+    List<NewsResponseDto> getTopViewedNews(@Param("limit") int limit);
+
+    List<KeywordCountDto> getTotalLikesByKeyword(@Param("limit") int limit);
 }

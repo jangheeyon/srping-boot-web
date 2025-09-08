@@ -163,7 +163,7 @@
         WHERE news_id = #{newsId}
     </update>
 
-    <select id="findTopLikedNews" resultType="com.ccp.simple.dto.NewsResponseDto">
+    <select id="getTopLikedNews" resultType="com.ccp.simple.dto.NewsResponseDto">
         SELECT news_id, title, link, description, pub_dt, visible, like_count, view_count
         FROM NEWS_INFO
         WHERE visible = true
@@ -171,7 +171,7 @@
             LIMIT #{limit}
     </select>
 
-    <select id="findTopViewedNews" resultType="com.ccp.simple.dto.NewsResponseDto">
+    <select id="getTopViewedNews" resultType="com.ccp.simple.dto.NewsResponseDto">
         SELECT news_id, title, link, description, pub_dt, visible, like_count, view_count
         FROM NEWS_INFO
         WHERE visible = true
@@ -179,4 +179,20 @@
             LIMIT #{limit}
     </select>
 
+    <select id="getTotalLikesByKeyword" resultType="com.ccp.simple.dto.KeywordCountDto">
+        SELECT
+            k.keyword AS keyword,
+            SUM(n.like_count) AS totalLikes
+        FROM
+            NEWS_INFO n
+                JOIN
+            NEWS_KEYWORD_MAPPING m ON n.news_id = m.news_id
+                JOIN
+            KEYWORD_INFO k ON m.keyword_id = k.keyword_id
+        GROUP BY
+            k.keyword
+        ORDER BY
+            totalLikes DESC
+            LIMIT #{limit}
+    </select>
 </mapper>

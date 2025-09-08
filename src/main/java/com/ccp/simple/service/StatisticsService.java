@@ -1,5 +1,6 @@
 package com.ccp.simple.service;
 
+import com.ccp.simple.dto.KeywordCountDto;
 import com.ccp.simple.dto.NewsResponseDto;
 
 import java.util.List;
@@ -10,4 +11,5 @@ public interface StatisticsService {
 
     List<NewsResponseDto> getTopViewedNews(int limit);
 
+    List<KeywordCountDto> getTotalLikesByKeyword(int limit);
 }

@@ -1,5 +1,6 @@
 package com.ccp.simple.controller;
 
+import com.ccp.simple.dto.KeywordCountDto;
 import com.ccp.simple.dto.NewsResponseDto;
 import com.ccp.simple.service.StatisticsService;
 import lombok.RequiredArgsConstructor;
@@ -25,5 +26,10 @@ public class StatisticsController {
     @GetMapping("/topViewed")
     public List<NewsResponseDto> getTopViewedNews(@RequestParam(defaultValue = "10") int limit) {
         return statisticsService.getTopViewedNews(limit);
+    }
+
+    @GetMapping("/totalLikesByKeyword")
+    public List<KeywordCountDto> getTotalLikesByKeyword(@RequestParam(defaultValue = "10") int limit) {
+        return statisticsService.getTotalLikesByKeyword(limit);
     }
 }

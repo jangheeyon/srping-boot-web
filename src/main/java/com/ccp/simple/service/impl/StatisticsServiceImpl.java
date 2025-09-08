@@ -1,5 +1,6 @@
 package com.ccp.simple.service.impl;
 
+import com.ccp.simple.dto.KeywordCountDto;
 import com.ccp.simple.dto.NewsResponseDto;
 import com.ccp.simple.mapper.NewsMapper;
 import com.ccp.simple.service.StatisticsService;
@@ -16,11 +17,16 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     @Override
     public List<NewsResponseDto> getTopLikedNews(int limit) {
-        return newsMapper.findTopLikedNews(limit);
+        return newsMapper.getTopLikedNews(limit);
     }
 
     @Override
     public List<NewsResponseDto> getTopViewedNews(int limit) {
-        return newsMapper.findTopViewedNews(limit);
+        return newsMapper.getTopViewedNews(limit);
+    }
+
+    @Override
+    public List<KeywordCountDto> getTotalLikesByKeyword(int limit) {
+        return newsMapper.getTotalLikesByKeyword(limit);
     }
 }
