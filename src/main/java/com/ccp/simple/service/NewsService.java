@@ -17,6 +17,10 @@ public interface NewsService {
 
     void updateLikeCount(Long newsId, int likeCount);
 
+    void incrementViewCount(Long newsId);
+
+    void updateViewCount(Long newsId, int viewCount);
+
     List<NewsResponseDto> searchNews(String query);
 
     List<NewsResponseDto> searchSimilarNews(Long newsId);

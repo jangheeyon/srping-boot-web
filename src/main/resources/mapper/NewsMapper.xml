@@ -16,7 +16,7 @@
         FROM NEWS_INFO n
                  LEFT JOIN NEWS_KEYWORD_MAPPING m ON n.news_id = m.news_id
                  LEFT JOIN KEYWORD_INFO k ON m.keyword_id = k.keyword_id
-        GROUP BY n.news_id, n.title, n.link, n.description, n.pub_dt, n.visible, n.like_count
+        GROUP BY n.news_id, n.title, n.link, n.description, n.pub_dt, n.visible, n.like_count, n.view_count
         ORDER BY n.pub_dt DESC
     </select>
 
@@ -36,7 +36,7 @@
         <foreach collection="list" item="id" open="(" separator="," close=")">
             #{id}
         </foreach>
-        GROUP BY n.news_id, n.title, n.link, n.description, n.pub_dt, n.visible, n.like_count
+        GROUP BY n.news_id, n.title, n.link, n.description, n.pub_dt, n.visible, n.like_count, n.view_count
     </select>
 
     <update id="updateNewsVisibility">
@@ -155,6 +155,28 @@
         SELECT news_id
         FROM user_news_like
         WHERE user_id = #{userId}
+    </select>
+
+    <update id="updateViewCount">
+        UPDATE NEWS_INFO
+        SET view_count = #{viewCount}
+        WHERE news_id = #{newsId}
+    </update>
+
+    <select id="findTopLikedNews" resultType="com.ccp.simple.dto.NewsResponseDto">
+        SELECT news_id, title, link, description, pub_dt, visible, like_count, view_count
+        FROM NEWS_INFO
+        WHERE visible = true
+        ORDER BY like_count DESC
+            LIMIT #{limit}
+    </select>
+
+    <select id="findTopViewedNews" resultType="com.ccp.simple.dto.NewsResponseDto">
+        SELECT news_id, title, link, description, pub_dt, visible, like_count, view_count
+        FROM NEWS_INFO
+        WHERE visible = true
+        ORDER BY view_count DESC
+            LIMIT #{limit}
     </select>
 
 </mapper>

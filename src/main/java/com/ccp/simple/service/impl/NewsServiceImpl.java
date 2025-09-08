@@ -27,8 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -116,7 +114,6 @@ public class NewsServiceImpl implements NewsService {
     }
 
     @Override
-    @Transactional
     public boolean toggleLike(String userId, Long newsId) {
         String likeKey = "news:like:" + newsId;
         Boolean isMember = redisTemplate.opsForSet().isMember(likeKey, userId);
@@ -140,13 +137,24 @@ public class NewsServiceImpl implements NewsService {
     }
 
     @Override
+    public void incrementViewCount(Long newsId) {
+        String viewKey = "news:view:" + newsId;
+        redisTemplate.opsForValue().increment(viewKey);
+    }
+
+    @Override
+    public void updateViewCount(Long newsId, int viewCount) {
+        newsMapper.updateViewCount(newsId, viewCount);
+    }
+
+    @Override
     public void insertKeyword(Keyword keyword) {
         newsMapper.insertKeyword(keyword);
     }
 
     @Override
     public List<Keyword> getAllKeywords() {
-        return  newsMapper.getAllKeywords();
+        return newsMapper.getAllKeywords();
     }
 
     @Override
@@ -174,6 +182,14 @@ public class NewsServiceImpl implements NewsService {
                 news.setLiked(Boolean.TRUE.equals(redisTemplate.opsForSet().isMember(likeKey, userId)));
             } else {
                 news.setLiked(false);
+            }
+            String viewKey = "news:view:" + news.getNewsId();
+            String viewCountStr = redisTemplate.opsForValue().get(viewKey);
+            int redisViewCount = (viewCountStr != null) ? Integer.parseInt(viewCountStr) : 0;
+            // news.setViewCount(news.getViewCount() + redisViewCount);
+            // Redis에 값이 없으면 DB에서 조회된 viewCount가 그대로 유지됨
+            if (viewCountStr != null) {
+                news.setViewCount(Integer.parseInt(viewCountStr));
             }
         }
     }

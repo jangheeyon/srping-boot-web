@@ -22,6 +22,8 @@ public interface NewsMapper {
 
     void updateLikeCount(@Param("newsId") Long newsId, @Param("likeCount") int likeCount);
 
+    void updateViewCount(@Param("newsId") Long newsId, @Param("viewCount") int viewCount);
+
     boolean existsByLink(String link);
 
     Long getNewsIdByLink(@Param("link") String link);
@@ -41,4 +43,9 @@ public interface NewsMapper {
     List<Long> searchNewsIdsBySimilarUsers(@Param("list") List<String> userIds);
 
     List<Long> searchLikedNewsIdsByUser(@Param("userId") String userId);
+
+    // 통계용
+    List<NewsResponseDto> findTopLikedNews(@Param("limit") int limit);
+
+    List<NewsResponseDto> findTopViewedNews(@Param("limit") int limit);
 }

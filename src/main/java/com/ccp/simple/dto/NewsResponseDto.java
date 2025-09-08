@@ -15,4 +15,5 @@ public class NewsResponseDto {
     private boolean visible;
     private int likeCount;
     private boolean liked;
+    private int viewCount;
 }

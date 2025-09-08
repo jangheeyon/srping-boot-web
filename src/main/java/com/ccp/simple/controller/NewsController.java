@@ -20,7 +20,7 @@ import java.util.Map;
 public class NewsController {
 
     private final NewsService newsService;
-    private final RecommendationService recommendationService; // 추천 서비스 주입
+    private final RecommendationService recommendationService;
 
     // 뉴스 목록 조회
     @GetMapping("/news")
@@ -45,6 +45,13 @@ public class NewsController {
     public List<NewsResponseDto> getRecommendations(Authentication authentication) {
         String userId = authentication.getName();
         return recommendationService.recommendNewsBySimilarUsers(userId, 10); // 상위 10개 추천
+    }
+
+    // 뉴스 조회수 증가
+    @PostMapping("/news/{newsId}/view")
+    public ResponseEntity<Void> incrementViewCount(@PathVariable Long newsId) {
+        newsService.incrementViewCount(newsId);
+        return ResponseEntity.ok().build();
     }
 
     // (관리자) 뉴스 숨김/공개 처리
