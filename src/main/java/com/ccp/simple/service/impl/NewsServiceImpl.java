@@ -48,7 +48,7 @@ public class NewsServiceImpl implements NewsService {
     @Override
     public List<NewsResponseDto> getAllSubcribedNews() {
         String userId = checkUserId();
-        List<NewsResponseDto> newsList = newsMapper.getAllSubcribedNews();
+        List<NewsResponseDto> newsList = newsMapper.getAllSubcribedNews(userId);
         matchEsResultsWithRedisData(newsList, userId);
         return newsList;
     }

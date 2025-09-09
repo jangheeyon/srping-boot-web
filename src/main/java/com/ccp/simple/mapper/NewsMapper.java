@@ -13,7 +13,7 @@ import java.util.List;
 public interface NewsMapper {
     List<NewsResponseDto> getAllNews();
 
-    List<NewsResponseDto> getAllSubcribedNews();
+    List<NewsResponseDto> getAllSubcribedNews(@Param("userId") String userId);
 
     List<NewsResponseDto> findNewsByIds(List<Long> ids);
 
