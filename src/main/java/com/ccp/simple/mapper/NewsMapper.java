@@ -63,4 +63,7 @@ public interface NewsMapper {
     List<Keyword> findKeywordsByUserId(@Param("userId") String userId);
 
     void deleteKeywordSubscription(@Param("userId") String userId, @Param("keywordId") Long keywordId);
+
+    // 실시간 알림용
+    List<String> findUserIdsByKeywordId(@Param("keywordId") Long keywordId);
 }

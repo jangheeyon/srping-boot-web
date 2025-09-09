@@ -8,6 +8,7 @@ import com.ccp.simple.dto.NewsResponseDto;
 import com.ccp.simple.mapper.NewsMapper;
 import com.ccp.simple.repository.NewsSearchRepository;
 import com.ccp.simple.service.NewsService;
+import com.ccp.simple.service.NotificationService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,6 +37,8 @@ public class NewsServiceImpl implements NewsService {
     private final RedisTemplate<String, String> redisTemplate;
     private final NewsSearchRepository newsSearchRepository;
     private final ElasticsearchOperations elasticsearchOperations;
+    private final NotificationService notificationService;
+
 
     @Override
     public List<NewsResponseDto> getAllNews() {
@@ -84,6 +87,13 @@ public class NewsServiceImpl implements NewsService {
                         .pubDt(news.getPubDt())
                         .build();
                 newsSearchRepository.save(newsDocument);
+
+                // 3. 실시간 알림 전송 로직 (신규 추가)
+                List<String> subscribedUserIds = newsMapper.findUserIdsByKeywordId(keywordId);
+                for (String userId : subscribedUserIds) {
+                    String notificationMessage = "관심 키워드 관련 새 뉴스가 도착했습니다: " + news.getTitle();
+                    notificationService.send(userId, notificationMessage);
+                }
             } else {
                 newsId = newsMapper.getNewsIdByLink(link);
             }

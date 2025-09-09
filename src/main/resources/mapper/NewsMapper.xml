@@ -247,4 +247,10 @@
         WHERE user_id = #{userId} AND keyword_id = #{keywordId}
     </delete>
 
+    <select id="findUserIdsByKeywordId" resultType="string">
+        SELECT user_id
+        FROM user_keyword_mapping
+        WHERE keyword_id = #{keywordId}
+    </select>
+
 </mapper>
