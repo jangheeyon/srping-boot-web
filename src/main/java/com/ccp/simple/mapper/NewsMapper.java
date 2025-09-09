@@ -13,6 +13,8 @@ import java.util.List;
 public interface NewsMapper {
     List<NewsResponseDto> getAllNews();
 
+    List<NewsResponseDto> getAllSubcribedNews();
+
     List<NewsResponseDto> findNewsByIds(List<Long> ids);
 
     void insertNews(News news);
@@ -51,4 +53,14 @@ public interface NewsMapper {
     List<NewsResponseDto> getTopViewedNews(@Param("limit") int limit);
 
     List<KeywordCountDto> getTotalLikesByKeyword(@Param("limit") int limit);
+
+    Keyword findKeywordByName(@Param("keyword") String keyword);
+
+    void insertKeywordAndGetId(Keyword keyword);
+
+    void subscribeKeyword(@Param("userId") String userId, @Param("keywordId") Long keywordId);
+
+    List<Keyword> findKeywordsByUserId(@Param("userId") String userId);
+
+    void deleteKeywordSubscription(@Param("userId") String userId, @Param("keywordId") Long keywordId);
 }

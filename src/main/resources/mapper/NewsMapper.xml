@@ -5,38 +5,60 @@
 <mapper namespace="com.ccp.simple.mapper.NewsMapper">
 
     <select id="getAllNews" resultType="com.ccp.simple.dto.NewsResponseDto">
-        SELECT n.news_id,
-               n.title,
-               n.link,
-               n.description,
-               n.pub_dt,
-               string_agg(k.keyword, ', ') AS keywords,
-               n.visible,
-               n.like_count
+        SELECT
+        n.news_id,
+            n.title,
+            n.link,
+            n.description,
+            n.pub_dt,
+            string_agg(DISTINCT k.keyword, ', ') AS keywords,
+            n.visible,
+            n.like_count,
+            n.view_count
         FROM NEWS_INFO n
-                 LEFT JOIN NEWS_KEYWORD_MAPPING m ON n.news_id = m.news_id
-                 LEFT JOIN KEYWORD_INFO k ON m.keyword_id = k.keyword_id
-        GROUP BY n.news_id, n.title, n.link, n.description, n.pub_dt, n.visible, n.like_count, n.view_count
+        LEFT JOIN NEWS_KEYWORD_MAPPING m ON n.news_id = m.news_id
+        LEFT JOIN KEYWORD_INFO k ON m.keyword_id = k.keyword_id
+        GROUP BY n.news_id
         ORDER BY n.pub_dt DESC
     </select>
 
     <select id="findNewsByIds" resultType="com.ccp.simple.dto.NewsResponseDto">
         SELECT n.news_id,
-               n.title,
-               n.link,
-               n.description,
-               n.pub_dt,
-               string_agg(k.keyword, ', ') AS keywords,
-               n.visible,
-               n.like_count
+        n.title,
+        n.link,
+        n.description,
+        n.pub_dt,
+        string_agg(k.keyword, ', ') AS keywords,
+        n.visible,
+        n.like_count
         FROM NEWS_INFO n
-                 LEFT JOIN NEWS_KEYWORD_MAPPING m ON n.news_id = m.news_id
-                 LEFT JOIN KEYWORD_INFO k ON m.keyword_id = k.keyword_id
+        LEFT JOIN NEWS_KEYWORD_MAPPING m ON n.news_id = m.news_id
+        LEFT JOIN KEYWORD_INFO k ON m.keyword_id = k.keyword_id
         WHERE n.news_id IN
         <foreach collection="list" item="id" open="(" separator="," close=")">
             #{id}
         </foreach>
         GROUP BY n.news_id, n.title, n.link, n.description, n.pub_dt, n.visible, n.like_count, n.view_count
+    </select>
+
+    <select id="getAllSubcribedNews" resultType="com.ccp.simple.dto.NewsResponseDto">
+        SELECT
+            n.news_id,
+            n.title,
+            n.link,
+            n.description,
+            n.pub_dt,
+            string_agg(DISTINCT k.keyword, ', ') AS keywords,
+            n.visible,
+            n.like_count,
+            n.view_count
+        FROM NEWS_INFO n
+        LEFT JOIN NEWS_KEYWORD_MAPPING m ON n.news_id = m.news_id
+        LEFT JOIN KEYWORD_INFO k ON m.keyword_id = k.keyword_id
+        JOIN user_keyword_mapping ukm ON k.keyword_id = ukm.keyword_id
+        WHERE ukm.user_id = #{userId}
+        GROUP BY n.news_id
+        ORDER BY n.pub_dt DESC
     </select>
 
     <update id="updateNewsVisibility">
@@ -59,13 +81,13 @@
             pub_dt,
             visible
         ) VALUES (
-            #{title},
-            #{link},
-            #{description},
-            #{pubDt},
-            #{visible}
-        )
-        ON CONFLICT (link) DO NOTHING
+                     #{title},
+                     #{link},
+                     #{description},
+                     #{pubDt},
+                     #{visible}
+                 )
+            ON CONFLICT (link) DO NOTHING
     </insert>
 
     <insert id="insertNewsKeywordMapping">
@@ -73,10 +95,10 @@
             news_id,
             keyword_id
         ) VALUES (
-            #{newsId},
-            #{keywordId}
-        )
-        ON CONFLICT DO NOTHING
+                     #{newsId},
+                     #{keywordId}
+                 )
+            ON CONFLICT DO NOTHING
     </insert>
 
     <select id="existsByLink" parameterType="string" resultType="boolean">
@@ -100,18 +122,17 @@
             CREATE_DT
         )
         VALUES
-        (
-            #{keyword},
-            #{userId},
-            CURRENT_TIMESTAMP
-        )
+            (
+                #{keyword},
+                #{userId},
+                CURRENT_TIMESTAMP
+            )
     </insert>
 
     <select id="getAllKeywords" resultType="com.ccp.simple.domain.Keyword">
         SELECT
             KEYWORD_ID,
             KEYWORD,
-            USER_ID,
             CREATE_DT
         FROM KEYWORD_INFO
     </select>
@@ -195,4 +216,35 @@
             totalLikes DESC
             LIMIT #{limit}
     </select>
+
+    <select id="findKeywordByName" resultType="com.ccp.simple.domain.Keyword">
+        SELECT keyword_id, keyword, create_dt
+        FROM keyword_info
+        WHERE keyword = #{keyword}
+    </select>
+
+    <insert id="insertKeywordAndGetId" parameterType="com.ccp.simple.domain.Keyword" useGeneratedKeys="true" keyProperty="keywordId">
+        INSERT INTO keyword_info (keyword)
+        VALUES (#{keyword})
+        ON CONFLICT (keyword) DO NOTHING
+    </insert>
+
+    <insert id="subscribeKeyword">
+        INSERT INTO user_keyword_mapping (user_id, keyword_id)
+        VALUES (#{userId}, #{keywordId})
+        ON CONFLICT (user_id, keyword_id) DO NOTHING
+    </insert>
+
+    <select id="findKeywordsByUserId" resultType="com.ccp.simple.domain.Keyword">
+        SELECT k.keyword_id, k.keyword, k.create_dt
+        FROM keyword_info k
+        JOIN user_keyword_mapping ukm ON k.keyword_id = ukm.keyword_id
+        WHERE ukm.user_id = #{userId}
+    </select>
+
+    <delete id="deleteKeywordSubscription">
+        DELETE FROM user_keyword_mapping
+        WHERE user_id = #{userId} AND keyword_id = #{keywordId}
+    </delete>
+
 </mapper>

@@ -9,6 +9,8 @@ import java.util.List;
 public interface NewsService {
     List<NewsResponseDto> getAllNews();
 
+    List<NewsResponseDto> getAllSubcribedNews();
+
     void insertNews(String responseBody, Long keywordId) throws JsonProcessingException;
 
     void updateNewsVisibility(Long newsId, boolean visible);
@@ -25,9 +27,11 @@ public interface NewsService {
 
     List<NewsResponseDto> searchSimilarNews(Long newsId);
 
-    void insertKeyword(Keyword keyword);
-
     List<Keyword> getAllKeywords();
 
-    void deleteKeyword(int keywordId);
+    void subscribeToKeyword(String userId, String keyword);
+
+    List<Keyword> getKeywordsByUserId(String userId);
+
+    void unsubscribeFromKeyword(String userId, Long keywordId);
 }

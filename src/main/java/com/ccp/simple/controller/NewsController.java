@@ -28,6 +28,12 @@ public class NewsController {
         return newsService.getAllNews();
     }
 
+    // 구독 뉴스 목록 조회
+    @GetMapping("/news/subscribe")
+    public List<NewsResponseDto> getAllSubcribedNews() {
+        return newsService.getAllSubcribedNews();
+    }
+
     // 뉴스 검색
     @GetMapping("/news/search")
     public List<NewsResponseDto> searchNews(@RequestParam("q") String query) {
@@ -80,24 +86,21 @@ public class NewsController {
 
     //키워드 등록
     @PostMapping("/news/keyword")
-    public ResponseEntity<String> insertNewsKeyword(@RequestBody RegisterKeywordRequestDto dto) {
-        Keyword keyword = new Keyword();
-        keyword.setKeyword(dto.getKeyword());
-        keyword.setUserId(dto.getUserId());
-        newsService.insertKeyword(keyword);
-        return ResponseEntity.ok("키워드 등록 성공");
+    public ResponseEntity<String> subscribeToKeyword(@RequestBody RegisterKeywordRequestDto dto) {
+        newsService.subscribeToKeyword(dto.getUserId(), dto.getKeyword());
+        return ResponseEntity.ok("키워드를 구독했습니다.");
     }
 
-    //키워드 목록 조회
-    @GetMapping("/news/keyword")
-    public List<Keyword> getAllKeywords() {
-        return newsService.getAllKeywords();
+    @GetMapping("/news/keyword/{userId}")
+    public List<Keyword> getMyKeywords(@PathVariable String userId) {
+        return newsService.getKeywordsByUserId(userId);
     }
 
-    //키워드 삭제
-    @DeleteMapping("/news/keyword/{KeywordId}")
-    public void deleteKeyword(@PathVariable int KeywordId) {
-        newsService.deleteKeyword(KeywordId);
+    @DeleteMapping("/news/keyword/{keywordId}")
+    public ResponseEntity<Void> unsubscribeFromKeyword(@PathVariable Long keywordId, Authentication authentication) {
+        String userId = authentication.getName();
+        newsService.unsubscribeFromKeyword(userId, keywordId);
+        return ResponseEntity.ok().build();
     }
 
 }

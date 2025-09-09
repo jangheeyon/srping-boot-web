@@ -46,6 +46,14 @@ public class NewsServiceImpl implements NewsService {
     }
 
     @Override
+    public List<NewsResponseDto> getAllSubcribedNews() {
+        String userId = checkUserId();
+        List<NewsResponseDto> newsList = newsMapper.getAllSubcribedNews();
+        matchEsResultsWithRedisData(newsList, userId);
+        return newsList;
+    }
+
+    @Override
     public void insertNews(String responseBody, Long keywordId) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode itemList = objectMapper.readTree(responseBody).get("items");
@@ -148,18 +156,33 @@ public class NewsServiceImpl implements NewsService {
     }
 
     @Override
-    public void insertKeyword(Keyword keyword) {
-        newsMapper.insertKeyword(keyword);
-    }
-
-    @Override
     public List<Keyword> getAllKeywords() {
         return newsMapper.getAllKeywords();
     }
 
     @Override
-    public void deleteKeyword(int keywordId) {
-        newsMapper.deleteKeyword(keywordId);
+    public void subscribeToKeyword(String userId, String keyword) {
+        Keyword existingKeyword = newsMapper.findKeywordByName(keyword);
+        Long keywordId;
+        if (existingKeyword == null) {
+            Keyword newKeyword = new Keyword();
+            newKeyword.setKeyword(keyword);
+            newsMapper.insertKeywordAndGetId(newKeyword);
+            keywordId = newKeyword.getKeywordId();
+        } else {
+            keywordId = existingKeyword.getKeywordId();
+        }
+        newsMapper.subscribeKeyword(userId, keywordId);
+    }
+
+    @Override
+    public List<Keyword> getKeywordsByUserId(String userId) {
+        return newsMapper.findKeywordsByUserId(userId);
+    }
+
+    @Override
+    public void unsubscribeFromKeyword(String userId, Long keywordId) {
+        newsMapper.deleteKeywordSubscription(userId, keywordId);
     }
 
     //유저 확인
@@ -221,7 +244,7 @@ public class NewsServiceImpl implements NewsService {
             newsDtoMap.put(newsDto.getNewsId(), newsDto);
         }
 
-        List<NewsResponseDto> newsList = (List<NewsResponseDto>) newsDtoMap.values();
+        List<NewsResponseDto> newsList = new ArrayList<>(newsDtoMap.values());
         String userId = checkUserId();
         matchEsResultsWithRedisData(newsList, userId);
 
