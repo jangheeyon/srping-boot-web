@@ -3,8 +3,10 @@ package com.ccp.simple.controller;
 import com.ccp.simple.domain.Keyword;
 import com.ccp.simple.dto.NewsResponseDto;
 import com.ccp.simple.dto.RegisterKeywordRequestDto;
+import com.ccp.simple.scheduler.NewsCollectScheduler;
 import com.ccp.simple.service.NewsService;
 import com.ccp.simple.service.RecommendationService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -21,6 +23,7 @@ public class NewsController {
 
     private final NewsService newsService;
     private final RecommendationService recommendationService;
+    private final NewsCollectScheduler newsCollectScheduler;
 
     // 뉴스 목록 조회
     @GetMapping("/news")
@@ -103,4 +106,9 @@ public class NewsController {
         return ResponseEntity.ok().build();
     }
 
+    //뉴스 수집 스케줄러 트리거(테스트용)
+    @GetMapping("/news/collect/trigger")
+    public void newsCollectTrigger() throws JsonProcessingException {
+        newsCollectScheduler.collectNews();
+    }
 }

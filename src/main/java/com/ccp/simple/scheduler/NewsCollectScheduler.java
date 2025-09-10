@@ -25,7 +25,7 @@ import java.util.Map;
 public class NewsCollectScheduler {
     private final NewsService newsService;
 
-    @Scheduled(cron = "0 0 0 * * MON")  // 매주 월요일 00:00에 실행
+//    @Scheduled(cron = "0 */2 0 * * *")  // 매주 월요일 00:00에 실행
     public void collectNews() throws JsonProcessingException {
         String clientId = "DO2YnEI8qqODmwZOYP8N"; //애플리케이션 클라이언트 아이디
         String clientSecret = "6ilVZfSoiE"; //애플리케이션 클라이언트 시크릿
