@@ -1,9 +1,9 @@
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://dpg-d2ddbtogjchc73djg6a0-a.singapore-postgres.render.com:5432/simple_iltf
-    username: simple_iltf_user
-    password: r0wIZhk0jQfnrezBZlfH6Xrv0myK9pH3
+    url: jdbc:postgresql://dpg-d31tm9adbo4c739umo2g-a.singapore-postgres.render.com:5432/simple_7yle
+    username: simple_7yle_user
+    password: hdCWLPG1r3luMcDMw6TfwG4pHsBsi6Ey
   data:
     redis:
       host: localhost
