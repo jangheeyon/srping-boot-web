@@ -1,12 +1,14 @@
 package com.ccp.simple.service.impl;
 
 import com.ccp.simple.domain.User;
+import com.ccp.simple.exception.UserNotFoundException;
 import com.ccp.simple.mapper.UserMapper;
 import com.ccp.simple.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +23,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserById(String userId) {
-        return userMapper.getUserById(userId);
+        return Optional.ofNullable(userMapper.getUserById(userId))
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
     }
 
     @Override
