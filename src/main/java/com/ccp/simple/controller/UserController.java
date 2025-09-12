@@ -1,5 +1,6 @@
 package com.ccp.simple.controller;
 
+import com.ccp.simple.aop.LogActivity;
 import com.ccp.simple.domain.Role;
 import com.ccp.simple.domain.User;
 import com.ccp.simple.dto.RegisterUserRequestDto;
@@ -17,19 +18,19 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
 
-    //조회
+    @LogActivity("전체 사용자 조회 (관리자)")
     @GetMapping()
     public List<User> getAllUsers() {
         return userService.getAllUsers();
     }
 
-    //개별 조회
+    @LogActivity("개별 사용자 조회")
     @GetMapping("/{userId}")
     public User getUserById(@PathVariable String userId) {
         return userService.getUserById(userId);
     }
 
-    //회원 수정
+    @LogActivity("사용자 정보 수정")
     @PutMapping("/{userId}")
     public void updateUser(@RequestBody UpdateUserRequestDto updateUserRequestDto) {
         User user = new User();
@@ -40,13 +41,13 @@ public class UserController {
        userService.updateUser(user);
     }
 
-    //회원 삭제
+    @LogActivity("사용자 삭제")
     @DeleteMapping("/{userId}")
     public void deleteUser(@PathVariable String userId) {
         userService.deleteUser(userId);
     }
 
-    //회원 등록
+    @LogActivity("회원가입")
     @PostMapping("/register")
     public ResponseEntity<String> insertUser(@RequestBody RegisterUserRequestDto dto) {
         User user = new User();

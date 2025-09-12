@@ -1,5 +1,6 @@
 package com.ccp.simple.controller;
 
+import com.ccp.simple.aop.LogActivity;
 import com.ccp.simple.domain.Role;
 import com.ccp.simple.domain.User;
 import com.ccp.simple.dto.LoginRequestDto;
@@ -9,9 +10,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
@@ -25,6 +28,7 @@ public class AuthController {
     private final UserService userService;
     private final JwtTokenProvider jwtTokenProvider;
 
+    @LogActivity("사용자 로그인")
     @PostMapping("/login")
     public Map<String, String> login(@RequestBody LoginRequestDto request, HttpServletResponse response) {
         //검증
@@ -45,26 +49,7 @@ public class AuthController {
         return token;
     }
 
-    @GetMapping("/me")
-    public String currentUser(Authentication authentication) {
-        if (authentication == null) {
-            return "No Authentication found";
-        }
-        return "Currunt User ID : " + authentication.getPrincipal();
-    }
-
-    @GetMapping("/admin/test")
-    @PreAuthorize("hasRole('ADMIN')")
-    public String adminOnly() {
-        return "관리자만 접근 가능";
-    }
-
-    @GetMapping("/user/test")
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public String userAll() {
-        return "유저 접근 가능";
-    }
-
+    @LogActivity("토큰 재발급")
     @PostMapping("/refresh")
     public Map<String, String> refreshToken(@RequestBody Map<String, String> request) {
         String refreshToken = request.get("refreshToken");
@@ -88,6 +73,7 @@ public class AuthController {
         return tokens;
     }
 
+    @LogActivity("사용자 로그아웃")
     @PostMapping("/logout")
     public ResponseEntity<Map<String, String>> logout(Authentication authentication) {
         if (authentication == null) {
